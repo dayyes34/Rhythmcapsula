@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Выбор помещения</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    body {
+      font-family: sans-serif;
+      background-color: var(--tg-theme-bg-color, #fff);
+      color: var(--tg-theme-text-color, #000);
+      text-align: center;
+      padding-top: 50px;
+    }
+    button {
+      padding: 15px 25px;
+      margin: 10px;
+      font-size: 16px;
+      border-radius: 8px;
+    }
+  </style>
+</head>
+<body>
+  <img src="logo.png" width="120" alt="Логотип приложения">
+  <h3>Выберите помещение:</h3>
+  <button onclick="selectRoom(1)">Помещение 1 🟢</button>
+  <button onclick="selectRoom(2)">Помещение 2 🔵</button>
+
+  <script>
+    let tg = window.Telegram.WebApp;
+    tg.expand();
+
+    function selectRoom(roomNumber) {
+        // Перенаправляем пользователя на страницу календаря,
+        // передавая в параметрах выбранное помещение.
+        window.location.href = `/webapp/calendar.html?room=${roomNumber}`;
+    }
+  </script>
+</body>
+</html>
