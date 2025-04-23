@@ -8,8 +8,8 @@ dp = Dispatcher(bot)
 @dp.message_handler(commands=['start'])
 async def cmd_start(message: types.Message):
     keyboard = types.InlineKeyboardMarkup()
-    keyboard.add(types.InlineKeyboardButton(text="📲 йоба",
-                                            web_app=types.WebAppInfo(url="https://dayyes34.github.io/ritm0doctor/")))
+    keyboard.add(types.InlineKeyboardButton(text="📲 Test",
+                                            web_app=types.WebAppInfo(url="https://t.me/rhythmcapsule_bot/book")))
     await message.answer("Нажмите, чтобы забронировать помещение:", reply_markup=keyboard)
 
 @dp.message_handler(content_types=['web_app_data'])
