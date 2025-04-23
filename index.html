@@ -2,39 +2,40 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <title>Выбор помещения</title>
+  <title>Telegram Web App Test</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
     body {
       font-family: sans-serif;
-      background-color: var(--tg-theme-bg-color, #fff);
-      color: var(--tg-theme-text-color, #000);
       text-align: center;
-      padding-top: 50px;
+      padding-top: 20px;
+      background-color: var(--tg-theme-bg-color, #ffffff);
+      color: var(--tg-theme-text-color, #000000);
     }
     button {
-      padding: 15px 25px;
-      margin: 10px;
-      font-size: 16px;
-      border-radius: 8px;
+      padding: 12px 20px;
+      font-size: 18px;
     }
   </style>
 </head>
 <body>
-  <img src="logo.png" width="120" alt="Логотип приложения">
-  <h3>Выберите помещение:</h3>
-  <button onclick="selectRoom(1)">Помещение 1 🟢</button>
-  <button onclick="selectRoom(2)">Помещение 2 🔵</button>
 
-  <script>
-    let tg = window.Telegram.WebApp;
-    tg.expand();
+<img src="лого.png" width="100" alt="Лого"> <!-- Тут ваше лого -->
 
-    function selectRoom(roomNumber) {
-        // Перенаправляем пользователя на страницу календаря,
-        // передавая в параметрах выбранное помещение.
-        window.location.href = `/webapp/calendar.html?room=${roomNumber}`;
-    }
-  </script>
+<h3>Выберите помещение</h3>
+
+<button onclick="sendChoice(1)">Помещение №1</button>
+<button onclick="sendChoice(2)">Помещение №2</button>
+
+<script>
+  const tg = window.Telegram.WebApp;
+  tg.expand(); // открывается на весь экран telegram webapp
+
+  function sendChoice(room){
+    tg.sendData(JSON.stringify({room: room}));
+    tg.close();
+  }
+</script>
+
 </body>
 </html>
