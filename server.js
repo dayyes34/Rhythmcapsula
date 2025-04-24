@@ -61,9 +61,28 @@ app.get('/api/bookings', (req, res) => {
  
 
 // 🚩 API: Создание заявки ждёт подтверждения
-app.post("/api/bookings", (req, res) => {
-    const {date, hours, customer, username, total_price} = req.body;
+app.post('/api/bookings', (req, res) => {
+    const { date, hours, customer, username, totalprice, chat_id } = req.body;
+  
+    if (!chat_id) {
+      return res.status(400).json({status: "ERROR", message: "Не предусмотрен chat_id клиента"});
+    }
+  
     const pending = loadPending();
+  
+    const id = (pending.length ? Math.max(...pending.map(b => b.id)) + 1 : 1);
+  
+    const newBooking = { id, date, hours, customer, username, chat_id, totalprice };
+  
+    pending.push(newBooking);
+    savePending(pending);
+  
+    notifyAdmin(newBooking);
+    notifyCustomer(newBooking);
+  
+    res.json({status: "OK", bookingId: id});
+  });
+  
 
     // Новый простой ID (числовое значение)
     const id = pending.length ? Math.max(...pending.map(b => b.id)) + 1 : 1; 
@@ -92,20 +111,22 @@ function notifyAdmin({id, date, hours, customer, username, total_price}) {
 }
 
 // 🔔 Уведомление клиенту с реквизитами
-function notifyCustomer({username, date, hours, total_price}) {
-    const txt = `✅ Заявка создана!\nДата: ${date}\nВремя: ${hours.join(", ")}\nК оплате: ${total_price} руб.\n\nРеквизиты:\nНапиши сюда твои реквизиты`;
+// Уведомление клиенту
+function notifyCustomer({chat_id, date, hours, totalprice}) {
+    const txt = `Заявка создана\nДата: ${date}\nВремя: ${hours.join(", ")}\nК оплате: ${totalprice} руб\n\nРеквизиты:\nНапиши сюда твои реквизиты`;
     axios.post(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-        chat_id: username, // <-- без @
+        chat_id, // вот сюда chat_id, а не username!
         text: txt
     })
     .then(() => console.log("✅ Сообщение клиенту отправлено"))
-    .catch(() => console.log("❌ Не отправлено клиенту (пусть напишет боту /start)"));
+    .catch(() => console.log("❌ Не отправлено клиенту (возможно, не нажал старт)"));
 }
 
-function notifyApprovedCustomer({username, date, hours}) {
-    const txt = `🎉✅ Ваша заявка подтверждена!\nДата: ${date}\nВремя: ${hours.join(", ")}`;
+// Уведомление клиенту об успешном подтверждении заявки
+function notifyApprovedCustomer({chat_id, date, hours}, bookingId) {
+    const txt = `🎉✅ Ваша заявка подтверждена!\nНомер заявки: #${bookingId}\nДата: ${date}\nВремя: ${hours.join(", ")}`;
     axios.post(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-        chat_id: username,
+        chat_id,
         text: txt
     })
     .then(() => console.log('✅ Клиент уведомлен о подтверждении'))
@@ -113,10 +134,22 @@ function notifyApprovedCustomer({username, date, hours}) {
 }
 
 
+
 // 🔷 Инициализация Telegram бота для подтверждений
 const bot = new Telegraf(BOT_TOKEN);
 
-bot.start((ctx) => ctx.reply('Привет!'));
+bot.start(ctx => {
+    const chat_id = ctx.chat.id;
+    const username = ctx.from.username;
+  
+    const users = loadUsers(); // если нет файла, просто создай пустой объект
+  
+    users[username] = chat_id; // привязали username к chat_id
+    saveUsers(users);
+  
+    ctx.reply(`Ваш chat_id сохранён. Можете продолжать.`);
+  });
+  
 
 // ✅ ПОДТВЕРЖДЕНИЕ
 bot.command("approve", ctx => {
