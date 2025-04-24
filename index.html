@@ -30,16 +30,17 @@ let final_price = 0; //Итоговая цена бронирования
 
 let BOOKED={}; 
 
-fetch('https://drumfitness.ru/api/booked-slots')
-  .then(res=>res.json())
+fetch('https://drumfitness.ru/api/bookings')
+  .then(res => res.json())
   .then(data => {
-     BOOKED = data; // сервер сразу подает нужный формат
-     render();
+      BOOKED = data; // теперь без преобразований, т.к. API уже отдаёт в нужном формате
+      render();
   })
-  .catch(err => {
-     console.error(err);
-     alert('Ошибка загрузки расписания.');
+  .catch(err => { 
+    console.error(err); 
+    alert('Ошибка загрузки расписания.'); 
   });
+
 
 
 
@@ -88,24 +89,18 @@ function bookSlots() {
   })
   .then(res => res.json())
   .then(res => {
-   if(res.status === "OK"){
-      alert("✅ Забронировано успешно! Скоро администрация подтвердит заявку.");
-      // Заново загружаем данные календаря для обновления занятых слотов
-      fetch('https://drumfitness.ru/api/booked-slots')
-        .then(res=>res.json())
-        .then(data => {
-           BOOKED = data;
-           render(); 
-        })
-        .catch(err => {
-           console.error(err);
-           alert('Ошибка перезагрузки расписания.');
-        });
-   } else {
-      alert("❌ Ошибка при бронировании! Попробуй повторить запрос.");
-   }
-})
-
+     if(res.status === "OK"){
+         alert("✅ Забронировано успешно! Скоро администрация подтвердит заявку.");
+         location.reload();
+     } else {
+         alert("❌ Ошибка при бронировании! Попробуй повторить запрос.");
+     }
+  })
+  .catch(err => {
+      console.error(err);
+      alert("Ошибка связи с сервером. Повторите чуть позже.");
+  });
+}
 
 
 function getInitialL(d,h){
