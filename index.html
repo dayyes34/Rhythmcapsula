@@ -30,16 +30,17 @@ let final_price = 0; //Итоговая цена бронирования
 
 let BOOKED={}; 
 
-fetch('https://drumfitness.ru/api/bookings')
+fetch('https://drumfitness.ru/api/booked-slots')
   .then(res => res.json())
   .then(data => {
-      BOOKED = data; // теперь без преобразований, т.к. API уже отдаёт в нужном формате
+      BOOKED = data; // твой новый API УЖЕ дает формат как раз {дата:[часы,...]}
       render();
   })
   .catch(err => { 
     console.error(err); 
     alert('Ошибка загрузки расписания.'); 
   });
+
 
 
 
