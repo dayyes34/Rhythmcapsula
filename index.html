@@ -30,12 +30,17 @@ let final_price = 0; //Итоговая цена бронирования
 
 let BOOKED={}; 
 
-fetch('https://drumfitness.ru/api/booked-slots')
+fetch('https://drumfitness.ru/api/bookings')
   .then(res=>res.json())
-  .then(data=>{
-    BOOKED=data;
-    render();
+  .then(data => {
+     BOOKED = {};
+     data.forEach(booking => {
+        if (!BOOKED[booking.date]) BOOKED[booking.date] = [];
+        BOOKED[booking.date].push(...booking.hours);
+     });
+     render();
   });
+
 
 
 function mskD(d){return new Date(d.getTime()+6e4*(MSK_OFFSET+d.getTimezoneOffset())).toISOString().slice(0,10);}
@@ -68,7 +73,7 @@ function bookSlots() {
   const username = Telegram.WebApp.initDataUnsafe?.user?.username;
   const customer = Telegram.WebApp.initDataUnsafe?.user?.first_name || username || "unknown";
 
-  fetch('https://drumfitness.ru/api/booked-slots', {
+  fetch('https://drumfitness.ru/api/bookings', {
      method: "POST",
      headers: {
        "Content-Type": "application/json"

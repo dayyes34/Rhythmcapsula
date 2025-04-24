@@ -42,23 +42,9 @@ function savePending(pending) {
 }
 
 // 🚩 API: Получение подтверждённых слотов
-// Этот endpoint остаётся полной информацией:
-app.get('/api/bookings', (req, res) => {
-   const bookings = loadBookings();
-   res.json(bookings);
+app.get("/api/bookings", (req, res) => {
+    res.json(loadBookings());
 });
-
-// Новый endpoint специально для календаря:
-app.get('/api/booked-slots', (req, res) => {
-  const bookings = loadBookings();
-  let result = {};
-  bookings.forEach(booking => {
-    if (!result[booking.date]) result[booking.date] = [];
-    result[booking.date].push(...booking.hours);
-  });
-  res.json(result);
-});
-
 
 // 🚩 API: Создание заявки ждёт подтверждения
 app.post("/api/bookings", (req, res) => {
