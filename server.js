@@ -217,3 +217,7 @@ app.listen(PORT, () => {
         .then(() => console.log('✅ Webhook успешно установлен:', webhookUrl))
         .catch(err => console.error('❌ Webhook не установлен:', err));
 });
+
+// 🔷 Запуск бота и сервера
+bot.launch();
+app.listen(PORT, () => console.log(`✅ Сервер запущен: порт ${PORT}`));
