@@ -30,7 +30,7 @@ let final_price = 0; //Итоговая цена бронирования
 
 let BOOKED={}; 
 
-fetch('https://drumfitness.ru/api/bookings')
+fetch('https://drumfitness.ru/api/booked-slots')
   .then(res=>res.json())
   .then(data=>{
     BOOKED=data;
@@ -68,7 +68,7 @@ function bookSlots() {
   const username = Telegram.WebApp.initDataUnsafe?.user?.username;
   const customer = Telegram.WebApp.initDataUnsafe?.user?.first_name || username || "unknown";
 
-  fetch('https://drumfitness.ru/api/bookings', {
+  fetch('https://drumfitness.ru/api/booked-slots', {
      method: "POST",
      headers: {
        "Content-Type": "application/json"
