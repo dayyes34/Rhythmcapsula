@@ -17,6 +17,8 @@ app.use(cors());
 const BOT_TOKEN = "8188912825:AAEEq8lTj3R_a0lx6OKPyt59Nc_jv04GRxs";
 const ADMIN_CHAT_ID = "6533586308"; // <-- поправь это после шага ниже
 
+bot.start((ctx) => ctx.reply('Привет!'));
+
 // Путь к файлам бронирования
 const BOOKINGS_FILE = "./bookings.json";
 const PENDING_FILE = "./pending_bookings.json";
