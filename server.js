@@ -93,36 +93,63 @@ function notifyAdmin({id, date, hours, customer, username, total_price}) {
 
 // 🔔 Уведомление клиенту с реквизитами
 function notifyCustomer({username, date, hours, total_price}) {
+    const bookings = loadBookings();
+    const userInfo = bookings[username];
+    const chat_id = userInfo ? userInfo.chat_id : null;
+
+    if (!chat_id) {
+        console.log(`❌ Нет chat_id для ${username}. Пусть нажмёт /start.`);
+        return;
+    }
+
     const txt = `✅ Заявка создана!\nДата: ${date}\nВремя: ${hours.join(", ")}\nК оплате: ${total_price} руб.\n\nРеквизиты:\nНапиши сюда твои реквизиты`;
     axios.post(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-        chat_id: username, // <-- без @
+        chat_id: chat_id,
         text: txt
     })
     .then(() => console.log("✅ Сообщение клиенту отправлено"))
-    .catch(() => console.log("❌ Не отправлено клиенту (пусть напишет боту /start)"));
+    .catch(() => console.error("❌ Ошибка отправки сообщения клиенту."));
 }
 
 function notifyApprovedCustomer({username, date, hours}) {
+    const bookings = loadBookings();
+    const userInfo = bookings[username];
+    const chat_id = userInfo ? userInfo.chat_id : null;
+
+    if (!chat_id) {
+        console.log(`❌ Нет chat_id для ${username}. Пусть нажмёт /start.`);
+        return;
+    }
+
     const txt = `🎉✅ Ваша заявка подтверждена!\nДата: ${date}\nВремя: ${hours.join(", ")}`;
     axios.post(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-        chat_id: username,
+        chat_id: chat_id,
         text: txt
     })
     .then(() => console.log('✅ Клиент уведомлен о подтверждении'))
-    .catch(err => console.error('Ошибка уведомления клиента:', err));
+    .catch(err => console.error('❌ Ошибка уведомления клиента:', err));
 }
 
 
 // 🔷 Инициализация Telegram бота для подтверждений
 const bot = new Telegraf(BOT_TOKEN);
 
-bot.start((ctx) => ctx.reply('Привет!'));
+bot.start((ctx) => {
+    const username = ctx.from.username;
+    const chat_id = ctx.chat.id;
 
-// ✅ ПОДТВЕРЖДЕНИЕ
-bot.command("approve", ctx => {
-    if (String(ctx.message.chat.id) !== ADMIN_CHAT_ID) {
-        return ctx.reply("🚫 Вы не админ!");
-    }
+    let bookings = loadBookings();
+    bookings[username] = { chat_id };
+    saveBookings(bookings);
+
+    ctx.reply('Привет! Ваш chat_id сохранен.');
+});
+
+
+// часть подтверждения заявки администратором
+bot.command("approve", (ctx) => {
+    if (String(ctx.message.chat.id) !== String(ADMIN_CHAT_ID)) 
+        return ctx.reply("Вы не админ!");
 
     const id = Number(ctx.message.text.split(" ")[1]); 
     let pending = loadPending();
@@ -133,22 +160,22 @@ bot.command("approve", ctx => {
 
     // Новый id для подтвержденной брони
     const bookingId = bookings.length
-        ? Math.max(...bookings.map(b => b.id)) + 1
+        ? Math.max(...Object.values(bookings).map(b => b.id || 0)) + 1
         : 1;
 
-    bookings.push({
+    bookings[booking.username] = {
+        ...bookings[booking.username],
         id: bookingId,
         date: booking.date,
         hours: booking.hours,
         customer: booking.customer,
-        username: booking.username,
         total_price: booking.total_price
-    });
+    };
 
     saveBookings(bookings);
     savePending(pending.filter(b => b.id !== id));
 
-    notifyApprovedCustomer(booking, bookingId);
+    notifyApprovedCustomer(booking);
     ctx.reply(`✅ Заявка #${bookingId} подтверждена!`);
 });
 
@@ -191,14 +218,23 @@ bot.command('cancel', ctx => {
 
 
 // Информируем клиента о подтверждении
-function notifyApprovedCustomer(booking, bookingId) {
-    const txt = `🎉✅ Ваша заявка подтверждена!\nНомер заявки: #${bookingId}\nДата: ${booking.date}\nВремя: ${booking.hours.join(", ")}`;
+function notifyApprovedCustomer(booking) {
+    const bookings = loadBookings();
+    const userInfo = bookings[booking.username];
+    const chat_id = userInfo ? userInfo.chat_id : null;
+
+    if (!chat_id) {
+        console.log(`❌ Нет chat_id для ${booking.username}. Пусть нажмёт /start.`);
+        return;
+    }
+
+    const txt = `🎉✅ Ваша заявка подтверждена!\nНомер заявки: #${booking.id}\nДата: ${booking.date}\nВремя: ${booking.hours.join(", ")}`;
     axios.post(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-        chat_id: booking.username,
+        chat_id: chat_id,
         text: txt
     })
     .then(() => console.log('✅ Клиент уведомлен о подтверждении'))
-    .catch(err => console.error('Ошибка отправки клиенту:', err));
+    .catch(err => console.error('❌ Ошибка отправки клиенту:', err));
 }
 
 bot.command('remove', ctx => {
