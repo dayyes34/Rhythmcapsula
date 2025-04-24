@@ -1,41 +1,136 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <title>Telegram Web App Test</title>
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <style>
-    body {
-      font-family: sans-serif;
-      text-align: center;
-      padding-top: 20px;
-      background-color: var(--tg-theme-bg-color, #ffffff);
-      color: var(--tg-theme-text-color, #000000);
-    }
-    button {
-      padding: 12px 20px;
-      font-size: 18px;
-    }
-  </style>
+    <meta charset="UTF-8"><title>Календарь Telegram бронирование с корректными скидками</title>
+    <style>
+        body{font-family:Arial;margin-bottom:140px;}
+        .slot{display:inline-block;width:72px;padding:3px;margin:2px;border:1px solid #aaa;border-radius:4px;cursor:pointer;text-align:center;}
+        .booked{background:#eee;cursor:not-allowed;color:#999;}
+        .selected{background:#039;color:#fff;}
+        .old-price{color:#a00;text-decoration:line-through;margin-right:5px;}
+        .final-price{color:green;font-weight:bold;}
+    </style>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
-
-<img src="лого.png" width="100" alt="Лого"> <!-- Тут ваше лого -->
-
-<h3>Выберите помещение</h3>
-
-<button onclick="sendChoice(1)">Помещение №1</button>
-<button onclick="sendChoice(2)">Помещение №2</button>
+<div id="calendar"></div>
+<div style="position:fixed;bottom:0;background:#ddd;width:100%;padding:8px;">
+    <button id="minusHour">➖</button>
+    <span id="hCount">3</span> ч.
+    <button id="plusHour">➕</button>
+    <div id="summary">Ничего не выбрано</div>
+    <button onclick="bookSlots()">Забронировать выбранное</button>
+</div>
 
 <script>
-  const tg = window.Telegram.WebApp;
-  tg.expand(); // открывается на весь экран telegram webapp
+Telegram.WebApp.expand();
+const MSK_OFFSET=180, openHour=7, closeHour=23,daysShow=28;
+let selD=null,selH=null,selL=3;
 
-  function sendChoice(room){
-    tg.sendData(JSON.stringify({room: room}));
-    tg.close();
+let BOOKED={}; 
+
+fetch('http://localhost:3000/api/bookings')
+  .then(res=>res.json())
+  .then(data=>{
+    BOOKED=data;
+    render();
+  });
+
+
+function mskD(d){return new Date(d.getTime()+6e4*(MSK_OFFSET+d.getTimezoneOffset())).toISOString().slice(0,10);}
+function render(){
+    let d=new Date(),html='';
+    for(let i=0;i<daysShow;i++){
+        let k=mskD(d),sd=new Date(d.getTime()+6e4*(MSK_OFFSET+d.getTimezoneOffset()));
+        html+=`<div><b>${sd.toLocaleDateString('ru',{weekday:'long',day:'numeric',month:'short'})}</b><br>`;
+        for(let h=openHour;h<closeHour;h++){
+            let b=BOOKED[k]?.includes(h)?'booked':'';
+            html+=`<div class='slot ${b}' data-d='${k}' data-h='${h}'>${h}:00</div>`;
+            if((h-openHour+1)%4==0)html+='<br>';
+        }
+        html+='</div><hr>';d.setDate(d.getDate()+1);
+    }
+    document.getElementById('calendar').innerHTML=html;
+    document.querySelectorAll('.slot:not(.booked)').forEach(e=>e.onclick=()=>choose(e.dataset.d,+e.dataset.h));
+}
+function free(d,h){return h>=openHour&&h<closeHour&&!BOOKED[d]?.includes(h)}
+function choose(d,h){selD=d;selH=h;selL=getInitialL(d,h);upd();}
+
+// пример метода отправки бронирования
+function bookSlots(){
+  if (!selD || selH === null || selL < 1) {
+    alert("Выбери слот для бронирования!");
+    return;
   }
-</script>
 
+  // Пример информации о юзере (нужно получать из Telegram, тут просто для примера)
+  const customer = Telegram.WebApp.initDataUnsafe?.user?.username || "unknown_user";
+
+  fetch('http://localhost:3000/api/bookings', {
+     method: "POST",
+     headers: {
+       "Content-Type": "application/json"
+     },
+     body: JSON.stringify({
+        date: selD,
+        hours: Array.from({length:selL}, (_,i)=>selH+i),
+        customer
+     })
+  }).then(res=>res.json())
+    .then(res=>{
+       if(res.status === "OK"){
+           alert("✅ Забронировано успешно!\nСпасибо за бронирование.");
+           location.reload();
+       }
+       else{
+           alert("❌ Ошибка при бронировании! Повторите попытку или обратитесь к администратору.");
+       }
+    }).catch(err => alert("Ошибка связи с сервером. Повторите чуть позже."));
+}
+
+
+function getInitialL(d,h){
+    if(free(d,h+1)&&free(d,h+2))return 3;
+    if(free(d,h+1))return 2;
+    if((!free(d,h-1)&&!free(d,h+1))||(h==closeHour-1&&!free(d,h-1)))return 1;
+    return 0;
+}
+function canBookOne(d,h){return(!free(d,h-1)&&!free(d,h+1))||(h==closeHour-1&&!free(d,h-1))}
+function upd(){
+    document.querySelectorAll('.slot').forEach(e=>e.classList.remove('selected'));
+    if(selL<1){selD=null;selH=null;selL=0;document.getElementById('summary').innerHTML='Неверный выбор';return;}
+    let total=0,full=0,basePrices=[];
+    for(let h=selH;h<selH+selL;h++){
+        document.querySelector(`.slot[data-d='${selD}'][data-h='${h}']`).classList.add('selected');
+        // исправлено тут (теперь явно указано для 1,2,3+ часов)
+        let basePrice = selL==1 ? 400 : (selL==2 ? 300 : (h-selH<2 ? 300 : 250));
+        basePrices.push(basePrice);
+    }
+    full=basePrices.reduce((a,b)=>a+b,0);
+
+    basePrices.forEach((hourPrice,i)=>{
+        let curHour=selH+i,discount=0;
+        if(curHour>=7&&curHour<11)discount=0.3;
+        else if(curHour>=11&&curHour<14)discount=0.1;
+        total+=hourPrice*(1-discount);
+    });
+    total=Math.round(total);
+    document.getElementById('hCount').innerText=selL;
+    let discText='';
+    if(total<full){
+        discText=`<span class="old-price">${full}₽</span><span class="final-price">${total}₽</span>`;
+    }else discText=`${full}₽`;
+    document.getElementById('summary').innerHTML=`Выбрано ${selD} с ${selH}:00 до ${selH+selL}:00 (${discText})`;
+}
+document.getElementById('minusHour').onclick=()=>{
+    if(selL>3||(selL==3&&free(selD,selH+1))||(selL==2&&canBookOne(selD,selH))){selL--;upd();}
+    else alert('Нельзя уменьшить меньше минимума');
+};
+document.getElementById('plusHour').onclick=()=>{
+    if(free(selD,selH+selL)){selL++;upd();}
+    else alert('Час занят или конец дня');
+};
+render();
+</script>
 </body>
 </html>
