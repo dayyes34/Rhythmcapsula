@@ -219,14 +219,14 @@ bot.command('remove', ctx => {
 bot.use(Telegraf.log());
 
 // 🚀 Настройте webhook для бота
-app.use(bot.webhookCallback('/bot')); // путь для webhook будет ваш_домен.ru/bot
+app.use(bot.webhookCallback('/api/bot'));  // путь для webhook будет ваш_домен.ru/bot
 
 // Запустите express сервер
 app.listen(PORT, () => {
     console.log(`🚀 App running on port ${PORT}`);
 
     // ✅ Установите webhook в Telegram явно
-    const webhookUrl = 'https://drumfitness.ru/bot'; // 👈 исправьте на ваш HTTPS-домен
+    const webhookUrl = 'https://drumfitness.ru/api/bot'; // 👈 исправьте на ваш HTTPS-домен
     bot.telegram.setWebhook(webhookUrl)
         .then(() => console.log('✅ Webhook успешно установлен:', webhookUrl))
         .catch(err => console.error('❌ Webhook не установлен:', err));
