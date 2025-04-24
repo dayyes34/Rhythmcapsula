@@ -26,6 +26,7 @@
 Telegram.WebApp.expand();
 const MSK_OFFSET=180, openHour=7, closeHour=23,daysShow=28;
 let selD=null,selH=null,selL=3;
+let final_price = 0; //Итоговая цена бронирования
 
 let BOOKED={}; 
 
@@ -57,14 +58,15 @@ function free(d,h){return h>=openHour&&h<closeHour&&!BOOKED[d]?.includes(h)}
 function choose(d,h){selD=d;selH=h;selL=getInitialL(d,h);upd();}
 
 // пример метода отправки бронирования
-function bookSlots(){
+function bookSlots() {
   if (!selD || selH === null || selL < 1) {
     alert("Выбери слот для бронирования!");
     return;
   }
 
-  // Пример информации о юзере (нужно получать из Telegram, тут просто для примера)
-  const customer = Telegram.WebApp.initDataUnsafe?.user?.username || "unknown_user";
+  // Telegram данные пользователя (username и имя)
+  const username = Telegram.WebApp.initDataUnsafe?.user?.username;
+  const customer = Telegram.WebApp.initDataUnsafe?.user?.first_name || username || "unknown";
 
   fetch('http://localhost:3000/api/bookings', {
      method: "POST",
@@ -73,19 +75,25 @@ function bookSlots(){
      },
      body: JSON.stringify({
         date: selD,
-        hours: Array.from({length:selL}, (_,i)=>selH+i),
-        customer
+        hours: Array.from({length: selL}, (_, i) => selH + i),
+        customer: customer,
+        username: username,
+        total_price: final_price  // <- Итоговая цена из нашей переменной
      })
-  }).then(res=>res.json())
-    .then(res=>{
-       if(res.status === "OK"){
-           alert("✅ Забронировано успешно!\nСпасибо за бронирование.");
-           location.reload();
-       }
-       else{
-           alert("❌ Ошибка при бронировании! Повторите попытку или обратитесь к администратору.");
-       }
-    }).catch(err => alert("Ошибка связи с сервером. Повторите чуть позже."));
+  })
+  .then(res => res.json())
+  .then(res => {
+     if(res.status === "OK"){
+         alert("✅ Забронировано успешно! Скоро администрация подтвердит заявку.");
+         location.reload();
+     } else {
+         alert("❌ Ошибка при бронировании! Попробуй повторить запрос.");
+     }
+  })
+  .catch(err => {
+      console.error(err);
+      alert("Ошибка связи с сервером. Повторите чуть позже.");
+  });
 }
 
 
@@ -115,6 +123,8 @@ function upd(){
         total+=hourPrice*(1-discount);
     });
     total=Math.round(total);
+    final_price = total; // Записываем итоговую цену в нашу переменную
+
     document.getElementById('hCount').innerText=selL;
     let discText='';
     if(total<full){
