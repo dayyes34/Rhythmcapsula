@@ -95,7 +95,7 @@ function notifyAdmin({id, date, hours, customer, username, total_price}) {
 function notifyCustomer({username, date, hours, total_price}) {
     const txt = `✅ Заявка создана!\nДата: ${date}\nВремя: ${hours.join(", ")}\nК оплате: ${total_price} руб.\n\nРеквизиты:\nНапиши сюда твои реквизиты`;
     axios.post(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-        chat_id: username, // <-- без @
+        chat_id: `@${username}`, // <-- без @
         text: txt
     })
     .then(() => console.log("✅ Сообщение клиенту отправлено"))
@@ -105,7 +105,7 @@ function notifyCustomer({username, date, hours, total_price}) {
 function notifyApprovedCustomer({username, date, hours}) {
     const txt = `🎉✅ Ваша заявка подтверждена!\nДата: ${date}\nВремя: ${hours.join(", ")}`;
     axios.post(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-        chat_id: username,
+        chat_id: `@${username}`,
         text: txt
     })
     .then(() => console.log('✅ Клиент уведомлен о подтверждении'))
@@ -194,7 +194,7 @@ bot.command('cancel', ctx => {
 function notifyApprovedCustomer(booking, bookingId) {
     const txt = `🎉✅ Ваша заявка подтверждена!\nНомер заявки: #${bookingId}\nДата: ${booking.date}\nВремя: ${booking.hours.join(", ")}`;
     axios.post(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-        chat_id: booking.username,
+        chat_id: `@${booking.username}`,
         text: txt
     })
     .then(() => console.log('✅ Клиент уведомлен о подтверждении'))
