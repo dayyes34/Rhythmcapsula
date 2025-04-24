@@ -1,13 +1,1 @@
-[
-  {
-    "id": 1,
-    "date": "2025-05-13",
-    "hours": [
-      11,
-      12,
-      13
-    ],
-    "customer": "unknown",
-    "total_price": 765
-  }
-]
+[]
