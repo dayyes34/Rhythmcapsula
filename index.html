@@ -3,13 +3,189 @@
 <head>
     <meta charset="UTF-8"><title>Календарь Telegram бронирование с корректными скидками</title>
     <style>
-        body{font-family:Arial;margin-bottom:140px;}
-        .slot{display:inline-block;width:72px;padding:3px;margin:2px;border:1px solid #aaa;border-radius:4px;cursor:pointer;text-align:center;}
-        .booked{background:#eee;cursor:not-allowed;color:#999;}
-        .selected{background:#039;color:#fff;}
-        .old-price{color:#a00;text-decoration:line-through;margin-right:5px;}
-        .final-price{color:green;font-weight:bold;}
-    </style>
+        body{
+    margin:0;
+    padding:0;
+    font-family:'Arial',sans-serif;
+    background:#000;
+    color:#fff;
+    user-select:none;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+}
+
+#logo{
+    width:100%;
+    text-align:center;
+    padding-top:15px;
+    padding-bottom:5px;
+}
+
+#logo img{
+    max-width:180px;
+}
+
+#calendar{
+    padding:15px 10px 180px;
+    width:100%;
+    max-width:400px;
+    text-align:center;
+    box-sizing:border-box;
+}
+
+.slot{
+    display:inline-block;
+    width:65px;
+    padding:6px;
+    margin:3px;
+    border-radius:8px;
+    cursor:pointer;
+    background:#111;
+    color:#ddd;
+    text-align:center;
+    transition:.2s ease;
+}
+
+.slot.booked{
+    background:#222;
+    color:#555;
+    cursor:not-allowed;
+}
+
+.slot.selected{
+    background:#0ff;
+    color:#000;
+    box-shadow:0 0 12px #0ff;
+}
+
+.neon-btn{
+    padding:15px 25px;
+    background:#000;
+    color:#00f7ff;
+    font-weight:bold;
+    font-size:16px;
+    border-radius:12px;
+    cursor:pointer;
+    border:2px solid #00f7ff;
+    box-shadow:0 0 15px #00f7ff, inset 0 0 5px rgba(0,247,255,0.5);
+    transition:0.3s ease;
+}
+
+.neon-btn:hover,
+.neon-btn:active{
+    background:#00f7ff;
+    color:#000;
+    box-shadow:0 0 25px #00f7ff, inset 0 0 10px rgba(255,255,255,0.6);
+}
+
+#bottom{
+    position:fixed;
+    bottom:0;
+    left:0;
+    width:100%;
+    padding:10px 0;
+    background:#000;
+    box-shadow:0 -3px 15px rgba(0,247,255,0.3);
+    border-top:2px solid #00f7ff;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    box-sizing:border-box;
+}
+
+button.small-btn{
+    background:#000;
+    border:2px solid #00f7ff;
+    border-radius:50%;
+    width:50px;
+    height:50px;
+    cursor:pointer;
+    box-shadow:0 0 15px #00f7ff, inset 0 0 5px rgba(0,247,255,0.4);
+    color:#00f7ff;
+    font-size:20px;
+    transition:.3s ease;
+    margin:6px;
+}
+
+button.small-btn:hover,
+button.small-btn:active{
+    background:#00f7ff;
+    color:#000;
+    box-shadow:0 0 25px #00f7ff,inset 0 0 10px rgba(255,255,255,0.6);
+}
+
+#summary{
+    margin:10px 0;
+    font-size:15px;
+    padding: 0 10px;
+}
+
+.old-price{
+    color:#a00;
+    text-decoration:line-through;
+    margin-right:5px;
+}
+
+.final-price{
+    color:#0f0;
+    font-weight:bold;
+}
+
+#calendar hr{
+    border:none;
+    margin:20px auto;
+    height:3px;
+    width:80%;
+    max-width:300px;
+    background:#00f7ff;
+    box-shadow:0 0 12px #00f7ff,0 0 6px #fff inset;
+    border-radius:20px;
+    filter:blur(1px);
+}
+
+/* важное дополнение: кнопки занимают всю ширину на мобильных */
+@media(max-width:480px){
+    body,html{
+        overflow-x:hidden;
+        touch-action:manipulation;
+    }
+
+    #bottom{
+        padding:15px 0;
+    }
+
+    .neon-btn{
+        width:calc(100% - 20px);
+        max-width:calc(100% - 20px);
+        box-sizing:border-box;
+        margin:8px 10px;
+    }
+
+    button.small-btn{
+        flex:1;
+        height:50px;
+        border-radius:8px;
+        width:auto;
+        max-width:calc(50% - 20px);
+        font-size:18px;
+        margin:8px 10px;
+    }
+
+    #summary{
+        margin:10px 0;
+        padding:0 10px;
+    }
+
+    #bottom .btn-group-small{
+        width:100%;
+        display:flex;
+        justify-content:center;
+        padding:5px 0;
+    }
+}
+</style>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
