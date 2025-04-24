@@ -83,21 +83,6 @@ app.post('/api/bookings', (req, res) => {
     res.json({status: "OK", bookingId: id});
   });
   
-
-    // Новый простой ID (числовое значение)
-    const id = pending.length ? Math.max(...pending.map(b => b.id)) + 1 : 1;  
-
-    const newBooking = {id, date, hours, customer, username, total_price};
-
-    pending.push(newBooking);
-    savePending(pending);
-
-    notifyAdmin(newBooking);
-    notifyCustomer(newBooking);
-
-    res.json({status: "OK", bookingId: id});
-
-
 // 🔔 Уведомление администратору
 function notifyAdmin({id, date, hours, customer, username, total_price}) {
     const txt = `📌 Новая заявка #${id}\nДата: ${date}\nВремя: ${hours.join(", ")}\nКлиент: ${customer}\nUsername: @${username}\nСумма: ${total_price}руб.\n\nПодтвердить оплату командой:\n/approve ${id}\nОтменить заявку командой:\n/cancel ${id}`;
