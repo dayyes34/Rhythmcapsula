@@ -85,7 +85,7 @@ app.post('/api/bookings', (req, res) => {
   
 
     // Новый простой ID (числовое значение)
-    const id = pending.length ? Math.max(...pending.map(b => b.id)) + 1 : 1; 
+    const id = pending.length ? Math.max(...pending.map(b => b.id)) + 1 : 1;  
 
     const newBooking = {id, date, hours, customer, username, total_price};
 
@@ -96,7 +96,6 @@ app.post('/api/bookings', (req, res) => {
     notifyCustomer(newBooking);
 
     res.json({status: "OK", bookingId: id});
-});
 
 
 // 🔔 Уведомление администратору
