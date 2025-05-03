@@ -13,7 +13,7 @@ fetch('https://drumfitness.ru/api/booked-slots')
   })
   .catch(err => { 
     console.error(err); 
-    alert('Ошибка загрузки расписания.'); 
+    alert('Ошибка загрузки расписания :('); 
   });
 
 
