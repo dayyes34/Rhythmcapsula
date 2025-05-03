@@ -107,81 +107,84 @@ app.get('/api/booked-slots', (req, res) => {
 
 // API: Создание нового бронирования
 app.post('/api/bookings', async (req, res) => {
-  try {
-    const { date, hours, customer, username, room = 'room1', total_price } = req.body;
-
-    if (!date || !hours || !hours.length) {
-      return res.status(400).json({ status: 'ERROR', message: 'Неверные данные бронирования' });
-    }
-
-    console.log(`New booking request: ${date}, ${room}, ${hours.join(',')}, ${customer}`);
-
-    // Загружаем текущие данные
-    const pendingBookings = readDataFile(PENDING_FILE);
-    const confirmedBookings = readDataFile(BOOKINGS_FILE);
-    const users = readDataFile(USERS_FILE);
-
-    // Проверяем, доступны ли выбранные слоты
-    const isSlotAvailable = (date, hour, room) => {
-      // Проверяем подтвержденные бронирования
-      if (confirmedBookings[room][date]) {
-        for (const booking of confirmedBookings[room][date]) {
-          if (booking.hours.includes(hour)) {
-            return false;
+    try {
+      const { date, hours, customer, username, room = 'room1', total_price } = req.body;
+  
+      if (!date || !hours || !hours.length) {
+        return res.status(400).json({ status: 'ERROR', message: 'Неверные данные бронирования' });
+      }
+  
+      console.log(`New booking request: ${date}, ${room}, ${hours.join(',')}, ${customer}`);
+  
+      // Загружаем текущие данные
+      const pendingBookings = readDataFile(PENDING_FILE);
+      const confirmedBookings = readDataFile(BOOKINGS_FILE);
+      const users = readDataFile(USERS_FILE);
+  
+      // Проверяем доступны ли выбранные слоты
+      const isSlotAvailable = (date, hour, room) => {
+        // Проверяем подтвержденные бронирования
+        if (confirmedBookings[room] && confirmedBookings[room][date]) {
+          for (const booking of confirmedBookings[room][date]) {
+            if (booking.hours.includes(hour)) {
+              return false;
+            }
           }
         }
-      }
-
-      // Проверяем ожидающие бронирования
-      if (pendingBookings[room][date]) {
-        for (const booking of pendingBookings[room][date]) {
-          if (booking.hours.includes(hour)) {
-            return false;
+  
+        // Проверяем ожидающие бронирования
+        if (pendingBookings[room] && pendingBookings[room][date]) {
+          for (const booking of pendingBookings[room][date]) {
+            if (booking.hours.includes(hour)) {
+              return false;
+            }
           }
         }
+  
+        return true;
+      };
+  
+      // Проверяем каждый час на доступность
+      for (const hour of hours) {
+        if (!isSlotAvailable(date, hour, room)) {
+          console.log(`Slot ${date} ${hour}:00 already booked`);
+          return res.status(409).json({ 
+            status: 'ERROR', 
+            message: `Час ${hour}:00 уже забронирован` 
+          });
+        }
       }
-
-      return true;
-    };
-
-    // Проверяем каждый час на доступность
-    for (const hour of hours) {
-      if (!isSlotAvailable(date, hour, room)) {
-        console.log(`Slot ${date} ${hour}:00 already booked`);
-        return res.status(409).json({ 
-          status: 'ERROR', 
-          message: `Час ${hour}:00 уже забронирован` 
-        });
+  
+      // Убедимся, что структура для комнаты и даты существует
+      if (!pendingBookings[room]) {
+        pendingBookings[room] = {};
       }
-    }
-
-    // Убедимся, что структура для комнаты и даты существует
-    if (!pendingBookings[room]) {
-      pendingBookings[room] = {};
-    }
-
-    if (!pendingBookings[room][date]) {
-      pendingBookings[room][date] = [];
-    }
-
-    // Создаем новое бронирование
-    const bookingId = Date.now().toString();
-    const chatId = users[username]?.chatId;
-
-    const newBooking = {
-      id: bookingId,
-      date,
-      hours,
-      customer,
-      username,
-      chatId,
-      total_price,
-      createdAt: new Date().toISOString()
-    };
-
-    // Добавляем бронирование в список ожидающих
-    pendingBookings[room][date].push(newBooking);
-    writeDataFile(PENDING_FILE, pendingBookings);
+  
+      if (!pendingBookings[room][date]) {
+        pendingBookings[room][date] = [];
+      }
+  
+      // Создаем новое бронирование
+      const bookingId = Date.now().toString();
+      const chatId = users[username]?.chatId;
+  
+      const newBooking = {
+        id: bookingId,
+        date,
+        hours,
+        customer,
+        username,
+        chatId,
+        total_price,
+        createdAt: new Date().toISOString()
+      };
+  
+      // Добавляем бронирование в список ожидающих
+      pendingBookings[room][date].push(newBooking);
+      writeDataFile(PENDING_FILE, pendingBookings);
+  
+      console.log(`Created new pending booking: ${bookingId}`);
+  
 
     console.log(`Created new pending booking: ${bookingId}`);
 
