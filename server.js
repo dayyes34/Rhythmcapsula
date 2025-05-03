@@ -375,7 +375,6 @@ bot.command('cancel', async (ctx) => {
 
     let foundBooking = null;
     let foundRoom = null;
-    let foundDate = null;
 
     // Поиск бронирования по ID
     for (const room in pendingBookings) {
