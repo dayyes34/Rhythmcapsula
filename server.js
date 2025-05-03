@@ -202,7 +202,7 @@ console.log('Created new pending booking', bookingId, 'saved:', saved);
                      `Для подтверждения используйте команду:\n` +
                      `/confirm_${bookingId}\n\n` +
                      `Для отмены используйте команду:\n` +
-                     `/cancel ${bookingId} причина`;
+                     `/cancel_${bookingId} Причина`;
 
     try {
       await bot.telegram.sendMessage(config.adminChatId, adminMsg);
@@ -213,12 +213,12 @@ console.log('Created new pending booking', bookingId, 'saved:', saved);
 
     // Отправляем уведомление пользователю, если у нас есть его chatId
     if (chatId) {
-      const userMsg = `🎯 Ваше бронирование принято и ожидает подтверждения!\n\n` +
+      const userMsg = `🎯 Ваша бронь принята и ожидает подтверждения!\n\n` +
                       `📅 Дата: ${date}\n` +
                       `🕒 Время: ${hours.map(h => `${h}:00`).join(', ')}\n` +
-                      `🏠 Зал: ${roomName}\n` +
+                      `🥁 Драм-Рум: ${roomName}\n` +
                       `💰 Стоимость: ${total_price} ₽\n\n` +
-                      `Администратор скоро свяжется с вами для подтверждения.`;
+                      `Администратор скоро свяжется с Вами для подтверждения`;
 
       try {
         await bot.telegram.sendMessage(chatId, userMsg);
@@ -255,10 +255,10 @@ bot.start(async (ctx) => {
     writeDataFile(USERS_FILE, users);
     console.log(`User registered: ${user.username || user.id}, chat_id: ${ctx.chat.id}`);
 
-    await ctx.reply(`Привет, ${user.first_name}! 👋\n\nЯ бот для бронирования залов. Вы можете забронировать зал через наш веб-интерфейс.\n\nЧтобы начать, нажмите на кнопку ниже:`, {
+    await ctx.reply(`Привет, ${user.first_name}! 👋\n\nЯ Бот бронирования Ритм Капсулы.\n\nЧтобы начать, нажмите на кнопку ниже:`, {
       reply_markup: {
         inline_keyboard: [
-          [{ text: '🗓 Открыть календарь бронирования', web_app: { url: 'https://your-booking-app-url.com' } }]
+          [{ text: '🗓 Открыть календарь бронирования', web_app: { url: 'https://t.me/rhythmcapsule_bot/book' } }]
         ]
       }
     });
@@ -316,7 +316,7 @@ for (const room in pendingBookings) {
 
 if (!foundBooking) {
   console.log(`Booking ${bookingId} not found`);
-  return ctx.reply(`Бронирование с ID ${bookingId} не найдено`);
+  return ctx.reply(`Бронь с ID ${bookingId} не найдена`);
 }
 
 // Убедимся что структура для комнаты и даты существует
@@ -366,20 +366,20 @@ console.log(`Booking ${bookingId} confirmed successfully`);
 });
 
 // Команда /cancel <bookingId> [причина] - отмена бронирования администратором
-bot.command('cancel', async (ctx) => {
+bot.hears(/\/cancel_(.+?)(?:\s+(.+))?$/, async (ctx) => {
   try {
     // Проверяем, что команду выполняет администратор
     if (ctx.chat.id.toString() !== config.adminChatId) {
       return ctx.reply('У вас нет прав для выполнения этой команды.');
     }
 
-    const parts = ctx.message.text.split(' ');
-    const bookingId = parts[1];
-    const reason = parts.slice(2).join(' ') || 'Причина не указана';
+    const bookingId = ctx.match[1];
+    const reason = ctx.match[2] || 'Причина не указана';
 
     if (!bookingId) {
-      return ctx.reply('Пожалуйста, укажите ID брони. Пример: /cancel 1234567890 причина отмены');
+      return ctx.reply('Пожалуйста, укажите ID брони. Пример: /cancel_1234567890 Причина отмены');
     }
+
 
     console.log(`Admin attempting to cancel booking: ${bookingId}`);
 
@@ -417,19 +417,19 @@ bot.command('cancel', async (ctx) => {
 
     console.log(`Booking ${bookingId} cancelled successfully`);
 
-    const roomName = foundRoom === 'room1' ? 'Зал 1' : 'Зал 2';
+    const roomName = foundRoom === 'room1' ? 'Капсула 🔵' : 'Капсула 🔴 ';
 
     // Отправляем уведомление администратору
-    ctx.reply(`❌ Бронирование #${bookingId} отменено.`);
+    ctx.reply(`❌ Бронь #${bookingId} отменена`);
 
     // Отправляем уведомление пользователю, если у нас есть его chatId
     if (foundBooking.chatId) {
-      const userMsg = `❌ Ваше бронирование отменено.\n\n` +
+      const userMsg = `❌ Ваша бронь отменена\n\n` +
                      `📅 Дата: ${foundBooking.date}\n` +
                      `🕒 Время: ${foundBooking.hours.map(h => `${h}:00`).join(', ')}\n` +
-                     `🏠 Зал: ${roomName}\n\n` +
-                     `Причина: ${reason}\n\n` +
-                     `Если у вас возникли вопросы, свяжитесь с нами.`;
+                     `🥁 Драм-Рум: ${roomName}\n\n` +
+                     `🤔 Причина: ${reason}\n\n` +
+                     `Если у вас возникли вопросы, свяжитесь с нами`;
 
       try {
         await bot.telegram.sendMessage(foundBooking.chatId, userMsg);
@@ -440,7 +440,113 @@ bot.command('cancel', async (ctx) => {
     }
   } catch (error) {
     console.error('Error in cancel command:', error);
-    ctx.reply('Произошла ошибка при отмене бронирования.');
+    ctx.reply('Произошла ошибка при отмене бронирования');
+  }
+});
+// Команда /listconfirmed - просмотр подтвержденных бронирований
+bot.command('listconfirmed', async (ctx) => {
+  try {
+    // Проверяем, что команду выполняет администратор
+    if (ctx.chat.id.toString() !== config.adminChatId) {
+      return ctx.reply('У вас нет прав для выполнения этой команды.');
+    }
+
+    // Загружаем данные
+    const confirmedBookings = readDataFile(BOOKINGS_FILE);
+
+    // Подготавливаем сообщение
+    let message = '📋 *Подтвержденные бронирования:*\n\n';
+    let bookingsFound = false;
+
+    // Проходимся по всем комнатам и датам
+    for (const room in confirmedBookings) {
+      for (const date in confirmedBookings[room]) {
+        const bookings = confirmedBookings[room][date];
+
+        if (bookings && bookings.length > 0) {
+          message += `*Комната ${room}, ${date}:*\n`;
+
+          bookings.forEach(booking => {
+            const hours = booking.hours.join(', ');
+            message += `ID: ${booking.id} | Часы: ${hours} | Клиент: ${booking.customer || 'Неизвестно'}\n`;
+            message += `Подтверждено: ${new Date(booking.confirmedAt).toLocaleString('ru-RU')}\n\n`;
+          });
+
+          bookingsFound = true;
+        }
+      }
+    }
+
+    if (!bookingsFound) {
+      message = 'Нет подтвержденных бронирований.';
+    }
+
+    return ctx.replyWithMarkdown(message);
+  } catch (error) {
+    console.error('Error listing confirmed bookings:', error);
+    ctx.reply('Произошла ошибка при получении списка подтвержденных бронирований.');
+  }
+});
+
+// Команда /deleteconfirmed_<bookingId> - удаление подтвержденного бронирования
+bot.hears(/\/deleteconfirmed_(\d+)/, async (ctx) => {
+  try {
+    // Проверяем, что команду выполняет администратор
+    if (ctx.chat.id.toString() !== config.adminChatId) {
+      return ctx.reply('У вас нет прав для выполнения этой команды.');
+    }
+
+    const bookingId = parseInt(ctx.match[1]);
+    if (!bookingId) {
+      return ctx.reply('Пожалуйста, укажите ID бронирования. Пример: /deleteconfirmed_1234567890');
+    }
+
+    // Загружаем данные
+    const confirmedBookings = readDataFile(BOOKINGS_FILE);
+
+    // Ищем и удаляем бронирование
+    let bookingFound = false;
+    let roomInfo = '';
+    let dateInfo = '';
+
+    // Проходимся по всем комнатам и датам
+    for (const room in confirmedBookings) {
+      for (const date in confirmedBookings[room]) {
+        const bookingIndex = confirmedBookings[room][date].findIndex(booking => booking.id === bookingId);
+
+        if (bookingIndex !== -1) {
+          // Сохраняем информацию для отчета
+          const booking = confirmedBookings[room][date][bookingIndex];
+          roomInfo = room;
+          dateInfo = date;
+          const hours = booking.hours.join(', ');
+
+          // Удаляем бронирование
+          confirmedBookings[room][date].splice(bookingIndex, 1);
+          bookingFound = true;
+
+          // Сохраняем изменения
+          writeDataFile(BOOKINGS_FILE, confirmedBookings);
+
+          return ctx.reply(
+            `✅ Подтвержденное бронирование удалено:\n` +
+            `ID: ${bookingId}\n` +
+            `Комната: ${roomInfo}\n` +
+            `Дата: ${dateInfo}\n` +
+            `Часы: ${hours}\n` +
+            `Клиент: ${booking.customer || 'Неизвестно'}`
+          );
+        }
+      }
+    }
+
+    if (!bookingFound) {
+      return ctx.reply(`⚠️ Подтвержденное бронирование с ID ${bookingId} не найдено.`);
+    }
+
+  } catch (error) {
+    console.error('Error deleting confirmed booking:', error);
+    ctx.reply('Произошла ошибка при удалении подтвержденного бронирования.');
   }
 });
 
@@ -467,7 +573,7 @@ bot.command('list', async (ctx) => {
                      `👤 Клиент: ${booking.customer}\n` +
                      `📅 Дата: ${booking.date}\n` +
                      `🕒 Время: ${booking.hours.map(h => `${h}:00`).join(', ')}\n` +
-                     `🏠 Зал: ${room === 'room1' ? 'Зал 1' : 'Зал 2'}\n` +
+                     `🏠 Драм-Рум: ${room === 'room1' ? '🔵' : '🔴'}\n` +
                      `💰 Стоимость: ${booking.total_price} ₽\n` +
                      `⏱ Создано: ${new Date(booking.createdAt).toLocaleString()}\n\n`;
         }
