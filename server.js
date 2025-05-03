@@ -180,13 +180,6 @@ const newBooking = {
   createdAt: new Date().toISOString()
 };
 
-// Читаем текущие ожидающие бронирования
-let pendingBookings = readDataFile(PENDING_FILE);
-if (!Array.isArray(pendingBookings)) {
-  console.log('Warning: pendingBookings not an array, initializing...');
-  pendingBookings = [];
-}
-
 // Добавляем новое бронирование в массив
 pendingBookings.push(newBooking);
 
