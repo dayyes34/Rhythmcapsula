@@ -3,26 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Календарь Telegram бронирование с корректными скидками</title>
-    <link rel="stylesheet" href="styles.css"> 
+    <title>Система бронирования</title>
+    <link rel="stylesheet" href="styles.css">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
-<div id="calendar"></div>
+    <h1>Бронирование</h1>
 
-<div class="bottom">
+    <div id="calendar">
+        <!-- Календарь будет здесь -->
+    </div>
+
+    <div id="summary">
+        Выберите время для бронирования
+    </div>
+
     <div class="controls">
-        <button id="minusHour">➖</button>
-        <span id="hCount">3</span> ч.
-        <button id="plusHour">➕</button>
+        <button id="minusHour">-</button>
+        <div id="hCount">0</div>
+        <button id="plusHour">+</button>
     </div>
 
-    <div id="summary">Ничего не выбрано</div>
+    <button onclick="bookSlots()">Забронировать</button>
 
-    <button class="btn-book" onclick="bookSlots()">Reserve</button>
-</div>
-
-    </div>
+    <script src="app.js"></script>
 </body>
-<script src="app.js"></script>
 </html>

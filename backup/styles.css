@@ -1,0 +1,167 @@
+/* Основные стили */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 20px;
+    background-color: #f5f5f5;
+}
+
+/* Стили для вкладок */
+.tabs-container {
+    display: flex;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #ddd;
+}
+
+.tab {
+    padding: 10px 20px;
+    cursor: pointer;
+    border: 1px solid #ddd;
+    border-bottom: none;
+    border-radius: 5px 5px 0 0;
+    margin-right: 5px;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.tab.active {
+    background-color: #f8f8f8;
+    border-bottom: 1px solid white;
+    margin-bottom: -1px;
+    font-weight: bold;
+}
+
+/* Стили для слотов */
+.slot-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.dateblock {
+    font-weight: bold;
+    margin-top: 20px;
+    margin-bottom: 10px;
+    font-size: 18px;
+}
+
+.slot {
+    padding: 10px 15px;
+    border-radius: 5px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.slot.booked {
+    background-color: #f0f0f0;
+    color: #999;
+    cursor: not-allowed;
+}
+
+.slot.not-booked {
+    background-color: #e0e0e0;
+    color: #333;
+}
+
+.slot.selected {
+    background-color: #4caf50;
+    color: white;
+}
+
+/* Стиль для прошедших слотов */
+.past-slot {
+    opacity: 0.5;
+    background-color: #f0f0f0 !important;
+    cursor: not-allowed !important;
+    text-decoration: line-through;
+}
+
+/* Цветовые схемы для разных румов */
+.room1-theme .tab.active {
+    background-color: #e8f4ff;
+    color: #0066cc;
+}
+
+.room2-theme .tab.active {
+    background-color: #f4ffe8;
+    color: #66cc00;
+}
+
+.room1-theme .slot.not-booked:hover {
+    background-color: #0066cc;
+    color: white;
+}
+
+.room2-theme .slot.not-booked:hover {
+    background-color: #66cc00;
+    color: white;
+}
+
+.room1-theme .slot.selected {
+    background-color: #0066cc;
+}
+
+.room2-theme .slot.selected {
+    background-color: #66cc00;
+}
+
+/* Стили для отображения цен */
+.oldprice {
+    text-decoration: line-through;
+    color: #999;
+    margin-right: 10px;
+}
+
+.finalprice {
+    font-weight: bold;
+    color: #4caf50;
+}
+
+/* Кнопки управления */
+button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin: 5px;
+    transition: background-color 0.3s;
+}
+
+#plusHour, #minusHour {
+    width: 40px;
+    height: 40px;
+    font-size: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.room1-theme button {
+    background-color: #0066cc;
+    color: white;
+}
+
+.room2-theme button {
+    background-color: #66cc00;
+    color: white;
+}
+
+button:hover {
+    opacity: 0.9;
+}
+
+/* Сводная информация */
+#summary {
+    margin: 20px 0;
+    padding: 15px;
+    border-radius: 5px;
+    background-color: #fff;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+hr {
+    border: none;
+    border-top: 1px solid #ddd;
+    margin: 20px 0;
+}
