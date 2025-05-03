@@ -180,15 +180,16 @@ const newBooking = {
   createdAt: new Date().toISOString()
 };
 
-// Добавляем новое бронирование в массив
-pendingBookings.push(newBooking);
+// Вместо повторного чтения файла
+pendingBookings[room][date].push(newBooking);
+writeDataFile(PENDING_FILE, pendingBookings);
 
 // Сохраняем обновленный массив
 const saved = writeDataFile(PENDING_FILE, pendingBookings);
-console.log(`Created new pending booking: ${bookingId}, saved: ${saved}`);
+console.log('Created new pending booking', bookingId, 'saved:', saved);
   
 
-// fasfasdfasdfdsafd
+
 
     // Отправляем уведомление администратору
     const roomName = room === 'room1' ? 'Зал 1' : 'Зал 2';
