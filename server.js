@@ -289,23 +289,34 @@ bot.command('confirm', async (ctx) => {
 
 
 // Поиск бронирования по ID
-let foundBookingIndex = -1;
+let foundBooking = null;
+let foundRoom = null;
+let foundDate = null;
 
-// Ищем бронирование в массиве
-foundBookingIndex = pendingBookings.findIndex(booking => booking.id === parseInt(bookingId) || booking.id === bookingId);
+// Ищем бронирование в вложенной структуре
+for (const room in pendingBookings) {
+  for (const date in pendingBookings[room]) {
+    const index = pendingBookings[room][date].findIndex(
+      booking => booking.id === parseInt(bookingId) || booking.id === bookingId
+    );
 
-if (foundBookingIndex === -1) {
+    if (index !== -1) {
+      foundBooking = pendingBookings[room][date][index];
+      foundRoom = room;
+      foundDate = date;
+
+      // Удаляем бронирование из списка ожидающих
+      pendingBookings[room][date].splice(index, 1);
+      break;
+    }
+  }
+  if (foundBooking) break;
+}
+
+if (!foundBooking) {
   console.log(`Booking ${bookingId} not found`);
   return ctx.reply(`Бронирование с ID ${bookingId} не найдено`);
 }
-
-// Получаем найденное бронирование
-foundBooking = pendingBookings[foundBookingIndex];
-const foundRoom = foundBooking.room || "default"; // Убедитесь, что у вас есть поле room
-const foundDate = foundBooking.date;
-
-// Удаляем бронирование из списка ожидающих
-pendingBookings.splice(foundBookingIndex, 1);
 
 // Убедимся что структура для комнаты и даты существует
 if (!confirmedBookings[foundRoom]) {
