@@ -284,8 +284,6 @@ bot.command('confirm', async (ctx) => {
     const pendingBookings = readDataFile(PENDING_FILE);
     const confirmedBookings = readDataFile(BOOKINGS_FILE);
 
-    let foundBooking = null;
-    let foundDate = null;
 
 // Поиск бронирования по ID
 let foundBookingIndex = -1;
@@ -375,6 +373,7 @@ bot.command('cancel', async (ctx) => {
 
     let foundBooking = null;
     let foundRoom = null;
+    let foundDate = null;
 
     // Поиск бронирования по ID
     for (const room in pendingBookings) {
