@@ -288,52 +288,44 @@ bot.command('confirm', async (ctx) => {
     let foundRoom = null;
     let foundDate = null;
 
-    // Поиск бронирования по ID
-for (const room in pendingBookings) {
-    for (const date in pendingBookings[room]) {
-      // Добавляем проверку, что pendingBookings[room][date] - это массив
-      if (Array.isArray(pendingBookings[room][date])) {
-        const index = pendingBookings[room][date].findIndex(booking => booking.id === bookingId);
-        if (index !== -1) {
-          foundBooking = pendingBookings[room][date][index];
-          foundRoom = room;
-          foundDate = date;
-  
-          // Удаляем бронирование из списка ожидающих
-          pendingBookings[room][date].splice(index, 1);
-          break;
-        }
-      } else {
-        console.log(`Warning: pendingBookings[${room}][${date}] is not an array:`, pendingBookings[room][date]);
-      }
-    }
-    if (foundBooking) break;
-  }
-  
+// Поиск бронирования по ID
+let foundBookingIndex = -1;
+let foundBooking = null;
 
-    if (!foundBooking) {
-      console.log(`Booking ${bookingId} not found`);
-      return ctx.reply(`Бронирование с ID ${bookingId} не найдено.`);
-    }
+// Ищем бронирование в массиве
+foundBookingIndex = pendingBookings.findIndex(booking => booking.id === parseInt(bookingId) || booking.id === bookingId);
 
-    // Убедимся, что структура для комнаты и даты существует
-    if (!confirmedBookings[foundRoom]) {
-      confirmedBookings[foundRoom] = {};
-    }
+if (foundBookingIndex === -1) {
+  console.log(`Booking ${bookingId} not found`);
+  return ctx.reply(`Бронирование с ID ${bookingId} не найдено`);
+}
 
-    if (!confirmedBookings[foundRoom][foundDate]) {
-      confirmedBookings[foundRoom][foundDate] = [];
-    }
+// Получаем найденное бронирование
+foundBooking = pendingBookings[foundBookingIndex];
+const foundRoom = foundBooking.room || "default"; // Убедитесь, что у вас есть поле room
+const foundDate = foundBooking.date;
 
-    // Добавляем бронирование в список подтвержденных
-    foundBooking.confirmedAt = new Date().toISOString();
-    confirmedBookings[foundRoom][foundDate].push(foundBooking);
+// Удаляем бронирование из списка ожидающих
+pendingBookings.splice(foundBookingIndex, 1);
 
-    // Сохраняем изменения
-    writeDataFile(PENDING_FILE, pendingBookings);
-    writeDataFile(BOOKINGS_FILE, confirmedBookings);
+// Убедимся что структура для комнаты и даты существует
+if (!confirmedBookings[foundRoom]) {
+  confirmedBookings[foundRoom] = {};
+}
 
-    console.log(`Booking ${bookingId} confirmed successfully`);
+if (!confirmedBookings[foundRoom][foundDate]) {
+  confirmedBookings[foundRoom][foundDate] = [];
+}
+
+// Добавляем бронирование в список подтвержденных
+foundBooking.confirmedAt = new Date().toISOString();
+confirmedBookings[foundRoom][foundDate].push(foundBooking);
+
+// Сохраняем изменения
+writeDataFile(PENDING_FILE, pendingBookings);
+writeDataFile(BOOKINGS_FILE, confirmedBookings);
+
+console.log(`Booking ${bookingId} confirmed successfully`);
 
     const roomName = foundRoom === 'room1' ? 'Зал 1' : 'Зал 2';
 
