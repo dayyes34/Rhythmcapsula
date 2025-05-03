@@ -510,6 +510,10 @@ app.listen(config.port, async () => {
     // Устанавливаем webhook для бота
     await bot.telegram.setWebhook(WEBHOOK_URL);
     console.log('Webhook set successfully to:', WEBHOOK_URL);
+
+    // Добавляем проверку статуса webhook
+    const webhookInfo = await bot.telegram.getWebhookInfo();
+    console.log('Webhook info:', webhookInfo);
   } catch (error) {
     console.error('Error setting webhook:', error);
     console.log('Falling back to polling mode...');
