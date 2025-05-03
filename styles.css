@@ -284,3 +284,63 @@ button.small-btn:active{
     overflow-y: auto;
     max-height: 70vh;
   }
+  /* CSS стили для вкладок и слотов */
+.room-tabs {
+    display: flex;
+    margin-bottom: 15px;
+  }
+  
+  .tab {
+    padding: 10px 20px;
+    background: #f0f0f0;
+    border: 1px solid #ddd;
+    cursor: pointer;
+    border-radius: 4px 4px 0 0;
+    margin-right: 5px;
+  }
+  
+  .tab.active {
+    background: #007bff;
+    color: white;
+    border-color: #0056b3;
+  }
+  
+  .slot.past {
+    background-color: #f0f0f0;
+    color: #999;
+    cursor: not-allowed;
+  }
+  
+  .slot.selected {
+    background-color: #28a745;
+    color: white;
+  }
+  
+  .controls {
+    margin: 15px 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  
+  .old-price {
+    text-decoration: line-through;
+    color: #999;
+    margin-right: 5px;
+  }
+  
+  .final-price {
+    color: #28a745;
+    font-weight: bold;
+  }
+  
+  #book-button {
+    padding: 10px 20px;
+    background: #28a745;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-top: 15px;
+  }
+  

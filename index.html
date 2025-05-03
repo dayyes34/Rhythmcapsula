@@ -8,6 +8,20 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
+    <!-- Добавьте в HTML часть: -->
+<div class="room-tabs">
+    <div id="tab-room1" class="tab active" onclick="switchRoom('room1')">Зал 1</div>
+    <div id="tab-room2" class="tab" onclick="switchRoom('room2')">Зал 2</div>
+  </div>
+  <div id="calendar"></div>
+  <div id="summary">Выберите слот для бронирования</div>
+  <div class="controls">
+    <button id="minusHour">-1 час</button>
+    <span id="hCount">0</span> ч
+    <button id="plusHour">+1 час</button>
+  </div>
+  <button id="book-button" onclick="bookSlots()">Забронировать</button>
+  
 <div id="calendar"></div>
 
 <div class="bottom">
