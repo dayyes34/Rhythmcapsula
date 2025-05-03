@@ -289,21 +289,27 @@ bot.command('confirm', async (ctx) => {
     let foundDate = null;
 
     // Поиск бронирования по ID
-    for (const room in pendingBookings) {
-      for (const date in pendingBookings[room]) {
+for (const room in pendingBookings) {
+    for (const date in pendingBookings[room]) {
+      // Добавляем проверку, что pendingBookings[room][date] - это массив
+      if (Array.isArray(pendingBookings[room][date])) {
         const index = pendingBookings[room][date].findIndex(booking => booking.id === bookingId);
         if (index !== -1) {
           foundBooking = pendingBookings[room][date][index];
           foundRoom = room;
           foundDate = date;
-
+  
           // Удаляем бронирование из списка ожидающих
           pendingBookings[room][date].splice(index, 1);
           break;
         }
+      } else {
+        console.log(`Warning: pendingBookings[${room}][${date}] is not an array:`, pendingBookings[room][date]);
       }
-      if (foundBooking) break;
     }
+    if (foundBooking) break;
+  }
+  
 
     if (!foundBooking) {
       console.log(`Booking ${bookingId} not found`);
