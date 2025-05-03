@@ -164,7 +164,7 @@ app.post('/api/bookings', async (req, res) => {
         pendingBookings[room][date] = [];
       }
   
-      // Создаем новое бронирование
+    // Создаем новое бронирование
 const bookingId = Date.now().toString();
 const chatId = users[username]?.chatId;
 
@@ -176,21 +176,26 @@ const newBooking = {
   username,
   chatId,
   total_price,
-  room, // Важно: добавляем информацию о комнате в объект бронирования
+  room, // Важно включить комнату в объект
   createdAt: new Date().toISOString()
 };
 
-// Проверяем, что pendingBookings - это массив
+// Читаем текущие ожидающие бронирования
+let pendingBookings = readDataFile(PENDING_FILE);
 if (!Array.isArray(pendingBookings)) {
+  console.log('Warning: pendingBookings not an array, initializing...');
   pendingBookings = [];
 }
 
-// Добавляем бронирование в массив ожидающих
+// Добавляем новое бронирование в массив
 pendingBookings.push(newBooking);
-writeDataFile(PENDING_FILE, pendingBookings);
 
-console.log(`Created new pending booking: ${bookingId}`);
+// Сохраняем обновленный массив
+const saved = writeDataFile(PENDING_FILE, pendingBookings);
+console.log(`Created new pending booking: ${bookingId}, saved: ${saved}`);
   
+
+
 
     // Отправляем уведомление администратору
     const roomName = room === 'room1' ? 'Зал 1' : 'Зал 2';
