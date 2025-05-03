@@ -90,7 +90,7 @@ body{
 }
 
 /* 2. если на странице есть .slot.selected — показываем */
-body:has(.slot.selected) .bottom{
+body:has(.slot.selected) .сontrols{
     display:block;
 }
 

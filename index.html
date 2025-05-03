@@ -10,19 +10,19 @@
 <body>
     <!-- Добавьте в HTML часть: -->
 <div class="room-tabs">
-    <div id="tab-room1" class="tab active" onclick="switchRoom('room1')">Зал 1</div>
-    <div id="tab-room2" class="tab" onclick="switchRoom('room2')">Зал 2</div>
+    <div id="tab-room1" class="tab active" onclick="switchRoom('room1')">Капсула 🔵</div>
+    <div id="tab-room2" class="tab" onclick="switchRoom('room2')">Капсула 🔴</div>
   </div>
   <div id="calendar"></div>
-  <div id="summary">Выберите слот для бронирования</div>
-  <div class="controls">
-    <button id="minusHour">-1 час</button>
-    <span id="hCount">0</span> ч
-    <button id="plusHour">+1 час</button>
-  </div>
-  <button id="book-button" onclick="bookSlots()">Забронировать</button>
-
+  <div class="booking-panel" id="bookingPanel">
+    <div id="summary">Выберите слот для бронирования</div>
+    <div class="controls">
+      <button id="minusHour">-</button>
+      <span id="hCount">0 </span>Ч
+      <button id="plusHour">+</button>
     </div>
+    <button id="book-button" onclick="bookSlots()">Забронировать</button>
+  </div>
 </body>
 <script src="app.js"></script>
 </html>

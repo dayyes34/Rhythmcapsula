@@ -117,44 +117,62 @@ function choose(d, h) {
     upd();
 }
 
-function upd(){
+function upd() {
     document.querySelectorAll('.slot').forEach(e=>e.classList.remove('selected'));
     if(selL<1){selD=null;selH=null;selL=0;document.getElementById('summary').innerHTML='Неверный выбор';return;}
-    let total=0,full=0,basePrices=[];
-    for(let h=selH;h<selH+selL;h++){
+
+    // Выделяем выбранные слоты
+    for(let h=selH; h<selH+selL; h++) {
         document.querySelector(`.slot[data-d='${selD}'][data-h='${h}']`).classList.add('selected');
-        // исправлено тут (теперь явно указано для 1,2,3+ часов)
-        let basePrice = selL==1 ? 400 : (selL==2 ? 300 : (h-selH<2 ? 300 : 250));
-        // Применяем наценку для второй комнаты
-        if (activeRoom === 'room2') {
-            basePrice = Math.round(basePrice * 1.2); // 20% наценка для второй комнаты
-        }
-        basePrices.push(basePrice);
     }
-    full=basePrices.reduce((a,b)=>a+b,0);
 
-    basePrices.forEach((hourPrice,i)=>{
-        let curHour=selH+i,discount=0;
-        if(curHour>=7&&curHour<11)discount=0.3;
-        else if(curHour>=11&&curHour<14)discount=0.1;
-        total+=hourPrice*(1-discount);
-    });
-    total=Math.round(total);
-    final_price = total; // Записываем итоговую цену в нашу переменную
+    // Расчет цены для комнаты 1
+    let price = 0;
+    if(selL == 1) {
+        price = 400; // 1 час = 300₽
+    } else {
+        price = 600; // Первые 2 часа = 600₽
+        if(selL > 2) {
+            price += (selL - 2) * 200; // Каждый дополнительный час +200₽
+        }
+    }
 
-    document.getElementById('hCount').innerText=selL;
-    let discText='';
-    if(total<full){
-        discText=`<span class="old-price">${full}₽</span><span class="final-price">${total}₽</span>`;
-    }else discText=`${full}₽`;
+    // Для комнаты 2 цена на 100₽ ниже
+    if(activeRoom === 'room2') {
+        price -= 100;
+    }
 
-    let roomName = activeRoom === 'room1' ? 'Зал 1' : 'Зал 2';
-    document.getElementById('summary').innerHTML=`Выбрано ${selD} с ${selH}:00 до ${selH+selL}:00 (${discText}) - ${roomName}`;
+    // Применение скидок для определенных часов
+    let total = 0;
+    let hourlyRate = price / selL; // Распределяем цену равномерно на все часы
+
+    for(let i=0; i<selL; i++) {
+        let curHour = selH + i;
+        let discount = 0;
+        if(curHour >= 7 && curHour < 11) discount = 0.3;
+        else if(curHour >= 11 && curHour < 14) discount = 0.1;
+        total += hourlyRate * (1-discount);
+    }
+
+    total = Math.round(total);
+    final_price = total; // Записываем итоговую цену в переменную
+
+    // Отображение информации
+    document.getElementById('hCount').innerText = selL;
+    let discText = '';
+    if(total < price) {
+        discText = `<span class="old-price">${price}₽</span><span class="discount-price">${total}₽</span>`;
+    } else {
+        discText = `<span class="regular-price">${price}₽</span>`;
+    }
+
+    let roomName = activeRoom === 'room1' ? 'Капсула 🔵' : 'Капсула 🔴';
+    document.getElementById('summary').innerHTML = `Выбрано ${selD} с ${selH}:00 до ${selH+selL}:00 ${discText} ${roomName}`;
 }
 
 document.getElementById('minusHour').onclick=()=>{
     if(selL>3||(selL==3&&free(selD,selH+1))||(selL==2&&canBookOne(selD,selH))){selL--;upd();}
-    else alert('Нельзя уменьшить меньше минимума');
+    else alert('Минимальное бронирование 2 часа');
 };
 
 document.getElementById('plusHour').onclick=()=>{

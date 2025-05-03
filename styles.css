@@ -1,346 +1,337 @@
-body{
-    margin:0;
-    padding:0;
-    font-family:'Arial',sans-serif;
-    background:#000;
-    color:#fff;
-    user-select:none;
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-}
-
-#logo{
-    width:100%;
-    text-align:center;
-    padding-top:15px;
-    padding-bottom:5px;
-}
-
-#logo img{
-    max-width:180px;
-}
-
-#calendar{
-    padding:15px 10px 180px;
-    width:100%;
-    max-width:400px;
-    text-align:center;
-    box-sizing:border-box;
-}
-
-.slot{
-    display:inline-block;
-    width:63px;
-    padding:12px;
-    margin:3px;
-    border-radius:8px;
-    
-    cursor:pointer;
-    background:#111;
-    color:#ddd;
-    text-align:center;
-    transition:.2s ease;
-}
-
-.slot.booked{
-    background:#222;
-    color:#555;
-    cursor:not-allowed;
-}
-
-.slot.selected{
-    background:#0ff;
-    color:#000;
-    box-shadow:0 0 12px #0ff;
-}
-
-.neon-btn{
-    padding:15px 25px;
-    background:#000;
-    color:#00f7ff;
-    font-weight:bold;
-    font-size:16px;
-    border-radius:12px;
-    cursor:pointer;
-    border:2px solid #00f7ff;
-    box-shadow:0 0 15px #00f7ff, inset 0 0 5px rgba(0,247,255,0.5);
-    transition:0.3s ease;
-}
-
-.neon-btn:hover,
-.neon-btn:active{
-    background:#00f7ff;
-    color:#000;
-    box-shadow:0 0 25px #00f7ff, inset 0 0 10px rgba(255,255,255,0.6);
-}
-
-.bottom{
-    display:none;
-
-    position:fixed;
-    bottom:0;
-    left:0;
-    right:0;
-    background:#000;
-    box-shadow:0 -2px 12px rgba(0,247,255,.7);
-    border-top:2px solid #00f7ff;
-    padding:20px;
-    text-align:center;
-}
-
-/* 2. если на странице есть .slot.selected — показываем */
-body:has(.slot.selected) .bottom{
-    display:block;
-}
-
-.controls {
-    margin-bottom: 15px;
-}
-
-#minusHour, #plusHour {
-    background: transparent;
-    color: #00f7ff;
-    font-size: 25px;
-    border: 2px solid #00f7ff;
-    border-radius: 50%;
-    width: 45px;
-    height: 45px;
-    cursor: pointer;
-    transition: 0.2s;
-}
-
-#minusHour:hover, #plusHour:hover {
-    background-color: #00f7ff;
-    color: #000;
-    box-shadow: 0 0 20px #00f7ff;
-}
-
-#hCount {
-    font-size: 25px;
-    margin: 0 10px;
-}
-
-#summary {
-    min-height: 20px;
-    margin-bottom: 15px;
-}
-
-.btn-book {
-    display: inline-block;
-    background-color: #00f7ff;
-    color: #000;
-    padding: 15px 30px;
+/* Импорт шрифта Mangrove */
+@font-face {
+    font-family: 'Mangrove';
+    src: url('./mangrove.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+  }
+  
+  /* Основные стили и сброс */
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: sans-serif;
+  }
+  
+  body {
+    background-color: #000000;
+    color: #ffffff;
+    padding-bottom: 80px;
+    padding-left: 15px;
+    padding-right: 15px;
+  }
+  
+  /* Фиксированные селекторы комнат */
+  .room-tabs {
+    position: sticky;
+    top: 0;
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    background-color: #000000;
+    padding: 15px 0;
+    z-index: 100;
+    width: 100%;
+    margin-left: -15px;
+    margin-right: -15px;
+    padding-left: 15px;
+    padding-right: 15px;
+    border-bottom: 1px solid #222;
+  }
+  
+  .room-tabs button {
+    background-color: #111;
     border: none;
-    border-radius: 12px;
-    font-size: 18px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 0 20px rgba(0, 247, 255, 0.5);
-}
-
-.btn-book:hover {
-    box-shadow: 0 0 30px rgba(0, 247, 255, 1);
-}
-
-button:focus {
+    color: #aaa;
+    padding: 3px 3px;
+    border-radius: 6px;
+    font-size: 15px;
+    font-weight: 600;
     outline: none;
-}
-button.small-btn{
-    background:#000;
-    border:2px solid #00f7ff;
-    border-radius:50%;
-    width:50px;
-    height:50px;
-    cursor:pointer;
-    box-shadow:0 0 15px #00f7ff, inset 0 0 5px rgba(0,247,255,0.4);
-    color:#00f7ff;
-    font-size:20px;
-    transition:.3s ease;
-    margin:6px;
-}
-
-button.small-btn:hover,
-button.small-btn:active{
-    background:#00f7ff;
-    color:#000;
-    box-shadow:0 0 25px #00f7ff,inset 0 0 10px rgba(255,255,255,0.6);
-}
-
-#summary{
-    margin:10px 0;
-    font-size:15px;
-    padding: 0 10px;
-}
-
-.old-price{
-    color:#a00;
-    text-decoration:line-through;
-    margin-right:5px;
-}
-
-.final-price{
-    color:#0f0;
-    font-weight:bold;
-}
-
-#calendar hr{
-    border:none;
-    margin:20px auto;
-    height:3px;
-    width:80%;
-    max-width:300px;
-    background:#00f7ff;
-    box-shadow:0 0 12px #00f7ff,0 0 6px #fff inset;
-    border-radius:20px;
-    filter:blur(1px);
-}
-/* важное дополнение: кнопки занимают всю ширину на мобильных */
-@media(max-width:480px){
-    body,html{
-        overflow-x:hidden;
-        touch-action:manipulation;
-    }
-
-    #bottom{
-        padding:15px 0;
-    }
-
-    .neon-btn{
-        width:calc(100% - 20px);
-        max-width:calc(100% - 20px);
-        box-sizing:border-box;
-        margin:8px 10px;
-    }
-
-    button.small-btn{
-        flex:1;
-        height:50px;
-        border-radius:8px;
-        width:auto;
-        max-width:calc(50% - 20px);
-        font-size:18px;
-        margin:8px 10px;
-    }
-
-    #summary{
-        margin:10px 0;
-        padding:0 10px;
-    }
-
-    #bottom .btn-group-small{
-        width:100%;
-        display:flex;
-        justify-content:center;
-        padding:5px 0;
-    }
-}.room-btn {
-  padding: 10px 15px;
-  border: 1px solid #ccc;
-  background-color: #f5f5f5;
-  margin-right: 5px;
-  cursor: pointer;
-}
-
-.room-btn.active {
-  background-color: #007bff;
-  color: white;
-  border-color: #0069d9;
-}
-
-.slot.past {
-  background-color: #f0f0f0;
-  color: #999;
-  text-decoration: line-through;
-  cursor: not-allowed;
-}
-
-.calendar-container {
-  overflow-y: auto;
-  max-height: 70vh;
-}
-.room-btn {
-    padding: 10px 15px;
-    border: 1px solid #ccc;
-    background-color: #f5f5f5;
-    margin-right: 5px;
     cursor: pointer;
+    transition: all 0.2s ease;
+    flex: 1;
+    max-width: 160px;
+    letter-spacing: 0.5px;
+    font-weight: 300;
   }
   
-  .room-btn.active {
-    background-color: #007bff;
-    color: white;
-    border-color: #0069d9;
+  /* Стили для активной комнаты 1 (голубой) */
+  #tab-room1.active {
+    background-color: rgba(0, 255, 255, 0.1);
+    border: 1px solid #00ffff;
+    border-radius: 6px;
+    color: #00ffff;
+    padding: 3px 3px;
+  font-weight: 500;
   }
   
-  .slot.past {
-    background-color: #f0f0f0;
-    color: #999;
-    text-decoration: line-through;
-    cursor: not-allowed;
+  /* Стили для активной комнаты 2 (розовый) */
+  #tab-room2.active {
+    background-color: rgba(255, 105, 180, 0.1);
+    border: 1px solid #ff69b4;
+    border-radius: 6px;
+    color: #ff69b4;
+    padding: 3px 3px;
+    font-weight: 500;
   }
   
-  .calendar-container {
-    overflow-y: auto;
-    max-height: 70vh;
-  }
-  /* CSS стили для вкладок и слотов */
-.room-tabs {
-    display: flex;
-    margin-bottom: 15px;
-  }
-  
-  .tab {
-    padding: 10px 20px;
-    background: #f0f0f0;
-    border: 1px solid #ddd;
-    cursor: pointer;
-    border-radius: 4px 4px 0 0;
-    margin-right: 5px;
-  }
-  
-  .tab.active {
-    background: #007bff;
-    color: white;
-    border-color: #0056b3;
-  }
-  
-  .slot.past {
-    background-color: #f0f0f0;
-    color: #999;
-    cursor: not-allowed;
-  }
-  
-  .slot.selected {
-    background-color: #28a745;
-    color: white;
-  }
-  
-  .controls {
-    margin: 15px 0;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-  
-  .old-price {
-    text-decoration: line-through;
-    color: #999;
-    margin-right: 5px;
-  }
-  
-  .final-price {
-    color: #28a745;
-    font-weight: bold;
-  }
-  
-  #book-button {
-    padding: 10px 20px;
-    background: #28a745;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
+  /* Контейнер календаря */
+  #calendar {
+    padding: 10px 0;
     margin-top: 15px;
   }
   
+  /* Блок даты */
+  .dateblock {
+    font-size: 16px;
+    margin: 28px 0 16px;
+    text-align: center;
+    font-weight: 500;
+    text-transform: capitalize;
+    color: #f0f0f0;
+    letter-spacing: 0.5px;
+    display: block;
+    width: 100%;
+    padding: 5px 0;
+    clear: both;
+    position: relative;
+  }
+  
+  /* Разделительная линия перед датой (кроме первой) */
+  .dateblock:not(:first-of-type) {
+    border-top: 1px solid #222;
+    padding-top: 25px;
+  }
+  
+  /* Контейнер для слотов */
+  .slot-container {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    margin-bottom: 15px;
+    margin-top: 12px;
+  }
+  
+  /* Стили для слотов */
+  .slot {
+    background-color: #111;
+    border-radius: 4px;
+    height: 46px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 14px;
+  }
+  
+  /* Когда комната 1 активна */
+  body:has(#tab-room1.active) .slot:not(.booked):not(.past) {
+    border: 1px solid #333;
+  }
+  
+  body:has(#tab-room1.active) .slot:not(.booked):not(.past):hover {
+    border: 1px solid #00ffff;
+    color: #00ffff;
+  }
+  
+  body:has(#tab-room1.active) .slot.selected {
+    border: 1px solid #00ffff;
+    background-color: rgba(0, 255, 255, 0.25);
+    color: #00ffff;
+  }
+  
+  /* Когда комната 2 активна */
+  body:has(#tab-room2.active) .slot:not(.booked):not(.past) {
+    border: 1px solid #333;
+  }
+  
+  body:has(#tab-room2.active) .slot:not(.booked):not(.past):hover {
+    border: 1px solid #ff69b4;
+    color: #ff69b4;
+  }
+  
+  body:has(#tab-room2.active) .slot.selected {
+    border: 1px solid #ff69b4;
+    background-color: rgba(255, 105, 180, 0.25);
+    color: #ff69b4;
+  }
+  
+  /* Занятые и прошедшие слоты */
+  .slot.booked {
+    background-color: #1a1a1a;
+    color: #555;
+    cursor: not-allowed;
+    border: 1px solid #333;
+  }
+  
+  .slot.past {
+    background-color: #0d0d0d;
+    color: #444;
+    cursor: not-allowed;
+    border: 1px solid #222;
+  }
+  
+  /* Удаляем неиспользуемый разделитель между днями */
+  hr {
+    display: none;
+  }
+  
+  /* Нижняя панель с выбором часов и кнопкой бронирования */
+  .booking-panel {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background-color: #000000;
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    transform: translateY(100%);
+    transition: transform 0.3s ease;
+    z-index: 1000;
+  }
+  
+  /* Используем :has для показа панели когда есть выбранные слоты */
+  body:has(.slot.selected) .booking-panel {
+    transform: translateY(0);
+    border-top: 1px solid #222;
+  }
+  
+  /* Стили для комнаты 1 */
+  body:has(#tab-room1.active) .booking-panel {
+    border-top: 1px solid #00ffff;
+  }
+  
+  /* Стили для комнаты 2 */
+  body:has(#tab-room2.active) .booking-panel {
+    border-top: 1px solid #ff69b4;
+  }
+  
+  /* Итоговая информация */
+  #summary {
+    font-size: 15px;
+    text-align: center;
+    padding: 8px 0;
+    font-weight: 400;
+    color: #e0e0e0;
+  }
+  
+  /* Контролы для выбора часов */
+  .controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    margin: 10px 0;
+  }
+  
+  .controls button {
+    width: 36px;
+    height: 36px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border-radius: 50%;
+    font-family: 'Mangrove', sans-serif;
+  }
+  
+  /* Стили кнопок плюс и минус для комнаты 1 */
+  body:has(#tab-room1.active) .controls button {
+    background-color: rgba(0, 255, 255, 0.1);
+    border: 1px solid #00ffff;
+    color: #00ffff;
+  }
+  
+  body:has(#tab-room1.active) .controls button:hover {
+    background-color: rgba(0, 255, 255, 0.2);
+    border-color: #00ffff;
+    color: #00ffff;
+  }
+  
+  /* Стили кнопок плюс и минус для комнаты 2 */
+  body:has(#tab-room2.active) .controls button {
+    background-color: rgba(255, 105, 180, 0.1);
+    border: 1px solid #ff69b4;
+    color: #ff69b4;
+  }
+  
+  body:has(#tab-room2.active) .controls button:hover {
+    background-color: rgba(255, 105, 180, 0.2);
+    border-color: #ff69b4;
+    color: #ff69b4;
+  }
+  
+  /* Счетчик часов */
+  #hCount {
+    font-weight: 200;
+    font-size: 26px;
+    font-family: 'Mangrove', sans-serif;
+  }
+  
+  /* Кнопка бронирования */
+  #book-button {
+    background-color: #111;
+    color: #fff;
+    padding: 14px;
+    border-radius: 6px;
+    font-size: 17px;  /* Увеличен размер текста */
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 5px;
+    transition: all 0.2s ease;
+    border: none;
+    letter-spacing: 0.5px;
+    font-family: 'Mangrove', sans-serif;
+  }
+  
+  /* Стили кнопки для комнаты 1 */
+  body:has(#tab-room1.active) #book-button {
+    background-color: rgba(0, 255, 255, 0.1);
+    border: 1px solid #00ffff;
+    color: #00ffff;
+  }
+  
+  body:has(#tab-room1.active) #book-button:hover {
+    background-color: rgba(0, 255, 255, 0.2);
+  }
+  
+  /* Стили кнопки для комнаты 2 */
+  body:has(#tab-room2.active) #book-button {
+    background-color: rgba(255, 105, 180, 0.1);
+    border: 1px solid #ff69b4;
+    color: #ff69b4;
+  }
+  
+  body:has(#tab-room2.active) #book-button:hover {
+    background-color: rgba(255, 105, 180, 0.2);
+  }
+  
+  /* Стили для цен */
+  .regular-price {
+    color: #4CAF50;
+    font-weight: bold;
+  }
+
+  .old-price {
+    text-decoration: line-through;
+    opacity: 0.7;
+    margin-right: 5px;
+    color: #B71C1C
+  }
+  
+  .discount-price {
+    font-weight: bold;
+    color: #FF5252
+  }
+  
+  /* Для поддержки Telegram WebApp */
+  .telegram-app {
+    max-width: 100%;
+    overflow-x: hidden;
+    color-scheme: dark;
+  }
