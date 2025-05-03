@@ -285,7 +285,6 @@ bot.command('confirm', async (ctx) => {
     const confirmedBookings = readDataFile(BOOKINGS_FILE);
 
     let foundBooking = null;
-    let foundRoom = null;
     let foundDate = null;
 
 // Поиск бронирования по ID
