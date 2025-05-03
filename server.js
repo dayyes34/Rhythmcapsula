@@ -290,7 +290,6 @@ bot.command('confirm', async (ctx) => {
 
 // Поиск бронирования по ID
 let foundBookingIndex = -1;
-let foundBooking = null;
 
 // Ищем бронирование в массиве
 foundBookingIndex = pendingBookings.findIndex(booking => booking.id === parseInt(bookingId) || booking.id === bookingId);
