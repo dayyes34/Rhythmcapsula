@@ -1,65 +1,65 @@
 const express = require('express');
-const cors = require('cors');
 const fs = require('fs');
-const { Telegraf } = require('telegraf');
+const cors = require('cors');
 const axios = require('axios');
+const { v4: uuidv4 } = require('uuid');
+const { Telegraf } = require('telegraf');
 
 const app = express();
-app.use(cors());
+const PORT = 3000;
 app.use(express.json());
+app.use(cors());
 
-const PORT = process.env.PORT || 3000;
-const BOT_TOKEN = "8188912825:AAEEq8lTj3R_a0lx6OKPyt59Nc_jv04GRxs";
-const ADMIN_CHAT_ID = "6533586308"; // <-- поправь это после шага ниже
+// Токен твоего Telegram бота (замени на свой)
+const BOT_TOKEN = '8188912825AAEEq8lTj3Ra0lx6OKPyt59Ncjv04GRxs';
+const ADMIN_CHAT_ID = '6533586308'; // поправь это после шага ниже
 
-// Пути к файлам для хранения данных
+// Путь к файлам бронирования (разделенные по комнатам)
 const BOOKINGS_FILE = 'bookings.json';
-const PENDING_FILE = 'pending_bookings.json';
+const PENDING_FILE = 'pending-bookings.json';
 
-// Функции для работы с хранилищем
+// Загрузка бронирований
 function loadBookings() {
-    try {
+    if (fs.existsSync(BOOKINGS_FILE)) {
         return JSON.parse(fs.readFileSync(BOOKINGS_FILE));
-    } catch (e) {
-        return {};
     }
+    return { drum: [], fitness: [] }; // Инициализируем с двумя комнатами
 }
 
+// Сохранение бронирований
 function saveBookings(bookings) {
     fs.writeFileSync(BOOKINGS_FILE, JSON.stringify(bookings, null, 2));
 }
 
+// Загрузка и сохранение заявок
 function loadPending() {
-    try {
-        return JSON.parse(fs.readFileSync(PENDING_FILE));
-    } catch (e) {
-        return [];
-    }
+    return fs.existsSync(PENDING_FILE) ? JSON.parse(fs.readFileSync(PENDING_FILE)) : [];
 }
 
 function savePending(pending) {
     fs.writeFileSync(PENDING_FILE, JSON.stringify(pending, null, 2));
 }
 
-// API для получения занятых слотов
-app.get('/api/bookedslots', (req, res) => {
-    const room = req.query.room || '1'; // По умолчанию первый рум
+// API: Получение подтверждённых слотов (полная информация)
+app.get('/api/bookings', (req, res) => {
     const bookings = loadBookings();
+    res.json(bookings);
+});
+
+// API: Получение забронированных слотов для календаря по комнате
+app.get('/api/booked-slots', (req, res) => {
+    const { room = 'drum' } = req.query; // По умолчанию drum, если не указано
+    const bookings = loadBookings();
+
+    // Выбираем бронирования только для указанной комнаты
+    const roomBookings = bookings[room] || [];
+
     let result = {};
-
-    // Фильтруем только бронирования для указанного рума
-    Object.values(bookings).forEach(userBookings => {
-        if (!Array.isArray(userBookings)) return; // Пропускаем объекты с chatid
-
-        userBookings.forEach(booking => {
-            // Проверяем, что бронирование относится к запрошенному руму
-            if (!booking.room || String(booking.room) === String(room)) {
-                if (!result[booking.date]) result[booking.date] = [];
-                booking.hours.forEach(hour => {
-                    if (!result[booking.date].includes(hour)) {
-                        result[booking.date].push(hour);
-                    }
-                });
+    roomBookings.forEach(booking => {
+        if (!result[booking.date]) result[booking.date] = [];
+        booking.hours.forEach(hour => {
+            if (!result[booking.date].includes(hour)) {
+                result[booking.date].push(hour);
             }
         });
     });
@@ -67,74 +67,76 @@ app.get('/api/bookedslots', (req, res) => {
     res.json(result);
 });
 
-// API для создания новой заявки
+// API: Создание заявки на бронирование (ждёт подтверждения)
 app.post('/api/bookings', (req, res) => {
-    const {date, hours, customer, username, totalprice, room} = req.body;
+    const { date, hours, customer, username, room = 'drum', totalprice } = req.body;
     const pending = loadPending();
 
-    // Новый простой ID - числовое значение
+    // Новый простой ID (числовое значение)
     const id = pending.length ? Math.max(...pending.map(b => b.id)) + 1 : 1;
 
-    const newBooking = {id, date, hours, customer, username, totalprice, room};
+    // Включаем информацию о комнате
+    const newBooking = { id, date, hours, customer, username, room, totalprice };
 
     pending.push(newBooking);
     savePending(pending);
 
     notifyAdmin(newBooking);
-    notifyCustomer(username, date, hours, totalprice);
+    notifyCustomer(newBooking);
 
-    res.json({status: 'OK', bookingId: id});
+    res.json({ status: 'OK', bookingId: id });
 });
 
-// Функция уведомления администратора
-function notifyAdmin({id, date, hours, customer, username, totalprice, room}) {
-    const roomText = room ? `\nЗал: ${room}` : '';
-    const txt = `Новая заявка #${id}\nДата: ${date}\nВремя: ${hours.join(', ')}\nКлиент: ${customer}\nUsername: ${username}${roomText}\nСумма: ${totalprice}руб\n\nПодтвердить оплату командой:\n/approve_${id}\nОтменить заявку командой:\n/cancel_${id}`;
+// Уведомление администратору
+function notifyAdmin({ id, date, hours, customer, username, room, totalprice }) {
+    const roomText = room === 'drum' ? 'Барабанная комната' : 'Фитнес зал';
+    const txt = `🔔 Новая заявка #${id}\nДата: ${date}\nВремя: ${hours.join(', ')}\nКомната: ${roomText}\nКлиент: ${customer}\nUsername: ${username}\nСумма: ${totalprice}руб\n\nПодтвердить оплату командой:\n/approve ${id}\nОтменить заявку командой:\n/cancel ${id}`;
 
     axios.post(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
         chat_id: ADMIN_CHAT_ID,
         text: txt
     })
-    .then(() => console.log('Сообщение администратору отправлено'))
-    .catch(() => console.error('Ошибка отправки сообщения администратору'));
+    .then(() => console.log('Сообщение админу отправлено'))
+    .catch(console.error);
 }
 
-// Функция уведомления клиента
-function notifyCustomer(username, date, hours, totalprice) {
+// Уведомление клиенту с реквизитами
+function notifyCustomer({ username, date, hours, room, totalprice }) {
     const bookings = loadBookings();
     const userInfo = bookings[username];
-    const chatid = userInfo ? userInfo.chatid : null;
+    const chatId = userInfo ? userInfo.chatId : null;
 
-    if (!chatid) {
-        console.log(`Нет chatid для ${username}. Пусть нажмёт /start`);
+    if (!chatId) {
+        console.log(`Нет chatId для ${username}. Пусть нажмёт /start`);
         return;
     }
 
-    const txt = `🎯 Заявка создана\nДата: ${date}\nВремя: ${hours.join(', ')}\nК оплате: ${totalprice} руб\n\nРеквизиты:\nНапиши сюда твои реквизиты`;
+    const roomText = room === 'drum' ? 'Барабанная комната' : 'Фитнес зал';
+    const txt = `🔔 Заявка создана\nДата: ${date}\nВремя: ${hours.join(', ')}\nКомната: ${roomText}\nК оплате: ${totalprice} руб\n\nРеквизиты:\nНапиши сюда твои реквизиты`;
+
     axios.post(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-        chat_id: chatid,
+        chat_id: chatId,
         text: txt
     })
     .then(() => console.log('Сообщение клиенту отправлено'))
-    .catch(() => console.error('Ошибка отправки сообщения клиенту'));
+    .catch(err => console.error('Ошибка отправки сообщения клиенту', err));
 }
 
-// Функция уведомления клиента о подтверждении
 function notifyApprovedCustomer(booking) {
     const bookings = loadBookings();
     const userInfo = bookings[booking.username];
-    const chatid = userInfo ? userInfo.chatid : null;
+    const chatId = userInfo ? userInfo.chatId : null;
 
-    if (!chatid) {
-        console.log(`Нет chatid для ${booking.username}. Пусть нажмёт /start`);
+    if (!chatId) {
+        console.log(`Нет chatId для ${booking.username}. Пусть нажмёт /start`);
         return;
     }
 
-    const roomText = booking.room ? `\nЗал: ${booking.room}` : '';
-    const txt = `✅ Ваша заявка подтверждена\nНомер заявки: ${booking.id}\nДата: ${booking.date}\nВремя: ${booking.hours.join(', ')}${roomText}`;
+    const roomText = booking.room === 'drum' ? 'Барабанная комната' : 'Фитнес зал';
+    const txt = `✅ Ваша заявка подтверждена\nНомер заявки: ${booking.id}\nДата: ${booking.date}\nВремя: ${booking.hours.join(', ')}\nКомната: ${roomText}`;
 
     axios.post(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-        chat_id: chatid,
+        chat_id: chatId,
         text: txt
     })
     .then(() => console.log('Клиент уведомлен о подтверждении'))
@@ -146,20 +148,17 @@ const bot = new Telegraf(BOT_TOKEN);
 
 bot.start(ctx => {
     const username = ctx.from.username;
-    const chatid = ctx.chat.id;
+    const chatId = ctx.chat.id;
 
-    let bookings = loadBookings() || {};
+    let bookings = loadBookings();
 
-    // Создаем хранилище chat_id, даже если пользователь еще не бронировал
-    if (!bookings[username]) {
-        bookings[username] = { chatid };
-    } else {
-        bookings[username].chatid = chatid;
-    }
+    // Сохраняем информацию о пользователе
+    if (!bookings.users) bookings.users = {};
+    bookings.users[username] = { chatId };
 
     saveBookings(bookings);
 
-    ctx.reply(`Привет! Ваш chat_id сохранен. Теперь вы можете приступить к бронированию.`);
+    ctx.reply('Привет! Ваш chatId сохранен');
 });
 
 // Команда подтверждения заявки администратором
@@ -168,76 +167,73 @@ bot.command('approve', ctx => {
         return ctx.reply('Вы не админ');
     }
 
-    // Используем _ как разделитель
-    const id = Number(ctx.message.text.split('_')[1]);
+    const id = Number(ctx.message.text.split(' ')[1]);
     let pending = loadPending();
     const booking = pending.find(b => b.id === id);
+
     if (!booking) return ctx.reply('Заявка не найдена');
 
     let bookings = loadBookings();
 
+    // Создадим массив для комнаты, если его нет
+    if (!bookings[booking.room]) bookings[booking.room] = [];
+
     // Новый id для подтвержденной брони
-    const bookingId = bookings[booking.username] && Array.isArray(bookings[booking.username]) ? 
-                      Math.max(...bookings[booking.username].map(b => b.id || 0), 0) + 1 : 1;
+    const bookingId = bookings[booking.room].length ? 
+        Math.max(...bookings[booking.room].map(b => b.id)) + 1 : 1;
 
-    if (!bookings[booking.username] || !Array.isArray(bookings[booking.username])) {
-        const chatid = bookings[booking.username] ? bookings[booking.username].chatid : null;
-        bookings[booking.username] = [];
-        if (chatid) bookings[booking.username].chatid = chatid;
-    }
-
-    bookings[booking.username].push({
+    // Добавляем бронь в соответствующую комнату
+    bookings[booking.room].push({
         id: bookingId,
         date: booking.date,
         hours: booking.hours,
         customer: booking.customer,
-        totalprice: booking.totalprice,
-        room: booking.room
+        username: booking.username,
+        totalprice: booking.totalprice
     });
 
     saveBookings(bookings);
     savePending(pending.filter(b => b.id !== id));
 
     notifyApprovedCustomer(booking);
-    ctx.reply(`Заявка ${bookingId} подтверждена`);
+    ctx.reply(`✅ Заявка #${bookingId} подтверждена в ${booking.room === 'drum' ? 'барабанной комнате' : 'фитнес зале'}`);
 });
 
-// Команда отмены ожидающей заявки
+// Команда отмены заявки
 bot.command('cancel', ctx => {
     if (String(ctx.message.chat.id) !== ADMIN_CHAT_ID) {
         return ctx.reply('Вы не админ');
     }
 
-    // Используем _ как разделитель
-    const id = Number(ctx.message.text.split('_')[1]);
+    const id = Number(ctx.message.text.split(' ')[1]);
     let pending = loadPending();
     const booking = pending.find(b => b.id === id);
 
     if (booking) {
         pending = pending.filter(b => b.id !== id);
         savePending(pending);
-        ctx.reply(`Заявка ${id} отменена (была в ожидании)`);
+        ctx.reply(`❌ Заявка #${id} отменена (была в ожидании)`);
         return;
     }
 
     const bookings = loadBookings();
     let found = false;
 
-    for (let username in bookings) {
-        if (Array.isArray(bookings[username])) {
-            const bookingIndex = bookings[username].findIndex(b => b.id === id);
+    // Проверяем обе комнаты
+    ['drum', 'fitness'].forEach(room => {
+        if (bookings[room] && bookings[room].length) {
+            const bookingIndex = bookings[room].findIndex(b => b.id === id);
             if (bookingIndex !== -1) {
-                bookings[username].splice(bookingIndex, 1);
+                bookings[room].splice(bookingIndex, 1);
                 found = true;
                 saveBookings(bookings);
-                break;
             }
         }
-    }
+    });
 
     found ? 
-        ctx.reply(`Заявка ${id} отменена (была подтверждена)`) : 
-        ctx.reply(`Заявка ${id} не найдена`);
+        ctx.reply(`❌ Заявка #${id} отменена (была подтверждена)`) : 
+        ctx.reply(`❓ Заявка #${id} не найдена`);
 });
 
 // Команда удаления подтвержденной заявки
@@ -246,41 +242,40 @@ bot.command('remove', ctx => {
         return ctx.reply('Вы не админ');
     }
 
-    // Используем _ как разделитель
-    const id = Number(ctx.message.text.split('_')[1]);
+    const id = Number(ctx.message.text.split(' ')[1]);
     let bookings = loadBookings();
     let found = false;
 
-    for (let username in bookings) {
-        if (Array.isArray(bookings[username])) {
-            const bookingIndex = bookings[username].findIndex(b => b.id === id);
+    // Проверяем обе комнаты
+    ['drum', 'fitness'].forEach(room => {
+        if (bookings[room]) {
+            const bookingIndex = bookings[room].findIndex(b => b.id === id);
             if (bookingIndex !== -1) {
-                bookings[username].splice(bookingIndex, 1);
+                bookings[room].splice(bookingIndex, 1);
                 found = true;
-                saveBookings(bookings);
-                break;
             }
         }
-    }
+    });
 
-    found ? 
-        ctx.reply(`Подтвержденная заявка ${id} удалена`) : 
-        ctx.reply(`Подтверждённая заявка ${id} не найдена`);
+    if (!found) return ctx.reply(`❓ Подтверждённая заявка #${id} не найдена`);
+
+    saveBookings(bookings);
+    ctx.reply(`✅ Подтвержденная заявка #${id} удалена.`);
 });
 
-// Добавляем логи для отладки
+// Логи для отладки
 bot.use(Telegraf.log());
 
-// Настраиваем webhook для бота
-app.use(bot.webhookCallback('/api/bot')); // путь для webhook будет вашдомен/api/bot
+// Настройка webhook для бота
+app.use(bot.webhookCallback('/api/bot'));  // путь для webhook будет ваш_домен.ru/bot
 
-// Запускаем express сервер
+// Запуск express сервера
 app.listen(PORT, () => {
-    console.log(`App running on port ${PORT}`);
+    console.log(`🚀 App running on port ${PORT}`);
 
-    // Устанавливаем webhook в Telegram явно
-    const webhookUrl = `https://drumfitness.ru/api/bot`; // исправьте на ваш HTTPS-домен
+    // Установка webhook в Telegram
+    const webhookUrl = 'https://drumfitness.ru/api/bot'; // исправьте на ваш HTTPS-домен
     bot.telegram.setWebhook(webhookUrl)
-        .then(() => console.log(`Webhook успешно установлен: ${webhookUrl}`))
-        .catch(err => console.error('Webhook не установлен', err));
+        .then(() => console.log('✅ Webhook успешно установлен:', webhookUrl))
+        .catch(err => console.error('❌ Webhook не установлен:', err));
 });

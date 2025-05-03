@@ -234,4 +234,53 @@ button.small-btn:active{
         justify-content:center;
         padding:5px 0;
     }
+}.room-btn {
+  padding: 10px 15px;
+  border: 1px solid #ccc;
+  background-color: #f5f5f5;
+  margin-right: 5px;
+  cursor: pointer;
 }
+
+.room-btn.active {
+  background-color: #007bff;
+  color: white;
+  border-color: #0069d9;
+}
+
+.slot.past {
+  background-color: #f0f0f0;
+  color: #999;
+  text-decoration: line-through;
+  cursor: not-allowed;
+}
+
+.calendar-container {
+  overflow-y: auto;
+  max-height: 70vh;
+}
+.room-btn {
+    padding: 10px 15px;
+    border: 1px solid #ccc;
+    background-color: #f5f5f5;
+    margin-right: 5px;
+    cursor: pointer;
+  }
+  
+  .room-btn.active {
+    background-color: #007bff;
+    color: white;
+    border-color: #0069d9;
+  }
+  
+  .slot.past {
+    background-color: #f0f0f0;
+    color: #999;
+    text-decoration: line-through;
+    cursor: not-allowed;
+  }
+  
+  .calendar-container {
+    overflow-y: auto;
+    max-height: 70vh;
+  }

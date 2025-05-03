@@ -1,167 +1,237 @@
-/* Основные стили */
-body {
-    font-family: Arial, sans-serif;
-    margin: 0;
-    padding: 20px;
-    background-color: #f5f5f5;
+body{
+    margin:0;
+    padding:0;
+    font-family:'Arial',sans-serif;
+    background:#000;
+    color:#fff;
+    user-select:none;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
 }
 
-/* Стили для вкладок */
-.tabs-container {
-    display: flex;
-    margin-bottom: 20px;
-    border-bottom: 1px solid #ddd;
+#logo{
+    width:100%;
+    text-align:center;
+    padding-top:15px;
+    padding-bottom:5px;
 }
 
-.tab {
-    padding: 10px 20px;
-    cursor: pointer;
-    border: 1px solid #ddd;
-    border-bottom: none;
-    border-radius: 5px 5px 0 0;
-    margin-right: 5px;
-    transition: background-color 0.3s, color 0.3s;
+#logo img{
+    max-width:180px;
 }
 
-.tab.active {
-    background-color: #f8f8f8;
-    border-bottom: 1px solid white;
-    margin-bottom: -1px;
-    font-weight: bold;
+#calendar{
+    padding:15px 10px 180px;
+    width:100%;
+    max-width:400px;
+    text-align:center;
+    box-sizing:border-box;
 }
 
-/* Стили для слотов */
-.slot-container {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
+.slot{
+    display:inline-block;
+    width:63px;
+    padding:12px;
+    margin:3px;
+    border-radius:8px;
+    
+    cursor:pointer;
+    background:#111;
+    color:#ddd;
+    text-align:center;
+    transition:.2s ease;
+}
+
+.slot.booked{
+    background:#222;
+    color:#555;
+    cursor:not-allowed;
+}
+
+.slot.selected{
+    background:#0ff;
+    color:#000;
+    box-shadow:0 0 12px #0ff;
+}
+
+.neon-btn{
+    padding:15px 25px;
+    background:#000;
+    color:#00f7ff;
+    font-weight:bold;
+    font-size:16px;
+    border-radius:12px;
+    cursor:pointer;
+    border:2px solid #00f7ff;
+    box-shadow:0 0 15px #00f7ff, inset 0 0 5px rgba(0,247,255,0.5);
+    transition:0.3s ease;
+}
+
+.neon-btn:hover,
+.neon-btn:active{
+    background:#00f7ff;
+    color:#000;
+    box-shadow:0 0 25px #00f7ff, inset 0 0 10px rgba(255,255,255,0.6);
+}
+
+.bottom{
+    display:none;
+
+    position:fixed;
+    bottom:0;
+    left:0;
+    right:0;
+    background:#000;
+    box-shadow:0 -2px 12px rgba(0,247,255,.7);
+    border-top:2px solid #00f7ff;
+    padding:20px;
+    text-align:center;
+}
+
+/* 2. если на странице есть .slot.selected — показываем */
+body:has(.slot.selected) .bottom{
+    display:block;
+}
+
+.controls {
     margin-bottom: 15px;
 }
 
-.dateblock {
-    font-weight: bold;
-    margin-top: 20px;
-    margin-bottom: 10px;
-    font-size: 18px;
-}
-
-.slot {
-    padding: 10px 15px;
-    border-radius: 5px;
-    text-align: center;
+#minusHour, #plusHour {
+    background: transparent;
+    color: #00f7ff;
+    font-size: 25px;
+    border: 2px solid #00f7ff;
+    border-radius: 50%;
+    width: 45px;
+    height: 45px;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: 0.2s;
 }
 
-.slot.booked {
-    background-color: #f0f0f0;
-    color: #999;
-    cursor: not-allowed;
+#minusHour:hover, #plusHour:hover {
+    background-color: #00f7ff;
+    color: #000;
+    box-shadow: 0 0 20px #00f7ff;
 }
 
-.slot.not-booked {
-    background-color: #e0e0e0;
-    color: #333;
+#hCount {
+    font-size: 25px;
+    margin: 0 10px;
 }
 
-.slot.selected {
-    background-color: #4caf50;
-    color: white;
-}
-
-/* Стиль для прошедших слотов */
-.past-slot {
-    opacity: 0.5;
-    background-color: #f0f0f0 !important;
-    cursor: not-allowed !important;
-    text-decoration: line-through;
-}
-
-/* Цветовые схемы для разных румов */
-.room1-theme .tab.active {
-    background-color: #e8f4ff;
-    color: #0066cc;
-}
-
-.room2-theme .tab.active {
-    background-color: #f4ffe8;
-    color: #66cc00;
-}
-
-.room1-theme .slot.not-booked:hover {
-    background-color: #0066cc;
-    color: white;
-}
-
-.room2-theme .slot.not-booked:hover {
-    background-color: #66cc00;
-    color: white;
-}
-
-.room1-theme .slot.selected {
-    background-color: #0066cc;
-}
-
-.room2-theme .slot.selected {
-    background-color: #66cc00;
-}
-
-/* Стили для отображения цен */
-.oldprice {
-    text-decoration: line-through;
-    color: #999;
-    margin-right: 10px;
-}
-
-.finalprice {
-    font-weight: bold;
-    color: #4caf50;
-}
-
-/* Кнопки управления */
-button {
-    padding: 10px 20px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    margin: 5px;
-    transition: background-color 0.3s;
-}
-
-#plusHour, #minusHour {
-    width: 40px;
-    height: 40px;
-    font-size: 20px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.room1-theme button {
-    background-color: #0066cc;
-    color: white;
-}
-
-.room2-theme button {
-    background-color: #66cc00;
-    color: white;
-}
-
-button:hover {
-    opacity: 0.9;
-}
-
-/* Сводная информация */
 #summary {
-    margin: 20px 0;
-    padding: 15px;
-    border-radius: 5px;
-    background-color: #fff;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    min-height: 20px;
+    margin-bottom: 15px;
 }
 
-hr {
+.btn-book {
+    display: inline-block;
+    background-color: #00f7ff;
+    color: #000;
+    padding: 15px 30px;
     border: none;
-    border-top: 1px solid #ddd;
-    margin: 20px 0;
+    border-radius: 12px;
+    font-size: 18px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 0 20px rgba(0, 247, 255, 0.5);
+}
+
+.btn-book:hover {
+    box-shadow: 0 0 30px rgba(0, 247, 255, 1);
+}
+
+button:focus {
+    outline: none;
+}
+button.small-btn{
+    background:#000;
+    border:2px solid #00f7ff;
+    border-radius:50%;
+    width:50px;
+    height:50px;
+    cursor:pointer;
+    box-shadow:0 0 15px #00f7ff, inset 0 0 5px rgba(0,247,255,0.4);
+    color:#00f7ff;
+    font-size:20px;
+    transition:.3s ease;
+    margin:6px;
+}
+
+button.small-btn:hover,
+button.small-btn:active{
+    background:#00f7ff;
+    color:#000;
+    box-shadow:0 0 25px #00f7ff,inset 0 0 10px rgba(255,255,255,0.6);
+}
+
+#summary{
+    margin:10px 0;
+    font-size:15px;
+    padding: 0 10px;
+}
+
+.old-price{
+    color:#a00;
+    text-decoration:line-through;
+    margin-right:5px;
+}
+
+.final-price{
+    color:#0f0;
+    font-weight:bold;
+}
+
+#calendar hr{
+    border:none;
+    margin:20px auto;
+    height:3px;
+    width:80%;
+    max-width:300px;
+    background:#00f7ff;
+    box-shadow:0 0 12px #00f7ff,0 0 6px #fff inset;
+    border-radius:20px;
+    filter:blur(1px);
+}
+/* важное дополнение: кнопки занимают всю ширину на мобильных */
+@media(max-width:480px){
+    body,html{
+        overflow-x:hidden;
+        touch-action:manipulation;
+    }
+
+    #bottom{
+        padding:15px 0;
+    }
+
+    .neon-btn{
+        width:calc(100% - 20px);
+        max-width:calc(100% - 20px);
+        box-sizing:border-box;
+        margin:8px 10px;
+    }
+
+    button.small-btn{
+        flex:1;
+        height:50px;
+        border-radius:8px;
+        width:auto;
+        max-width:calc(50% - 20px);
+        font-size:18px;
+        margin:8px 10px;
+    }
+
+    #summary{
+        margin:10px 0;
+        padding:0 10px;
+    }
+
+    #bottom .btn-group-small{
+        width:100%;
+        display:flex;
+        justify-content:center;
+        padding:5px 0;
+    }
 }
