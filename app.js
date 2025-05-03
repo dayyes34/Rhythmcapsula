@@ -1,4 +1,4 @@
-TelegramWebApp.expand();
+window.Telegram.WebApp.expand();
 const MSK_OFFSET=-180, openHour=7, closeHour=23, daysShow=28;
 let selD=null, selH=null, selL=3;
 let final_price = 0; // Итоговая цена бронирования
