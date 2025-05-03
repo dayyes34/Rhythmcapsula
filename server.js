@@ -188,7 +188,7 @@ const saved = writeDataFile(PENDING_FILE, pendingBookings);
 console.log(`Created new pending booking: ${bookingId}, saved: ${saved}`);
   
 
-
+// fasfasdfasdfdsafd
 
     // Отправляем уведомление администратору
     const roomName = room === 'room1' ? 'Зал 1' : 'Зал 2';
