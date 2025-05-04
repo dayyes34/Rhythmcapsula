@@ -259,7 +259,9 @@ bot.start(async (ctx) => {
       reply_markup: {
         inline_keyboard: [
           [{ text: '🗓 Открыть календарь бронирования', web_app: { url: 'https://drumfitness.ru' } }]
-        ]
+        ],
+        resize_keyboard: true,
+        persistent: true 
       }
     });
   } catch (error) {
