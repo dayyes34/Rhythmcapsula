@@ -258,7 +258,9 @@ bot.start(async (ctx) => {
     await ctx.reply("Привет! Я бот бронирования Ритм Капсулы.", {
       reply_markup: {
         inline_keyboard: [
-          [{ text: "🥁 Забронировать драм-рум", web_app: { url: "https://drumfitness.ru" } }]
+          [{ text: "☕️ Записаться на чилле", web_app: { url: "https://drumfitness.ru" } }],
+          [{ text: "🖐 Дать пять админам", callback_data: "high_five" }],
+          [{ text: "🚨 SOS: есть вопросик!", url: "https://t.me/rhythmcapsule" }]
         ]
       }
     });
@@ -266,6 +268,78 @@ bot.start(async (ctx) => {
     console.error('Error in start command:', error);
     ctx.reply('Произошла ошибка. Пожалуйста, попробуйте позже.');
   }
+});
+// Обработчик нажатия на кнопку "Дать пять админам"
+bot.action('high_five', async (ctx) => {
+  const userId = ctx.from.id;
+  const userName = ctx.from.username 
+    ? `@${ctx.from.username}` 
+    : `${ctx.from.first_name} ${ctx.from.last_name || ''}`.trim();
+
+  // Сообщаем пользователю, что пятюня отправлена
+  await ctx.answerCbQuery("✋ Пятюня отправлена!", {show_alert: true});
+  await ctx.reply("🖐 Твоя пятюня отправлена админам!");
+
+  // Отправляем уведомление администратору
+  try {
+    await bot.telegram.sendMessage(config.adminChatId, 
+      `🖐 Пользователь ${userName} дал тебе пять!`, {
+      reply_markup: {
+        inline_keyboard: [
+          [{ text: "🖐 Дать пять в ответ", callback_data: `high_five_back_${userId}` }]
+        ]
+      }
+    });
+    console.log(`High five notification sent to admin from user ${userId}`);
+  } catch (error) {
+    console.error('Error sending high five to admin:', error);
+  }
+});
+
+// Обработчик для ответной пятюни от админа
+bot.action(/high_five_back_(\d+)/, async (ctx) => {
+  if (ctx.chat.id.toString() !== config.adminChatId) {
+    return ctx.reply('У вас нет прав для выполнения этой команды.');
+  }
+
+  const userId = ctx.match[1];
+
+  // Запрашиваем сообщение от админа
+  const adminMsg = await ctx.reply("Напиши короткое сообщение для пользователя:", {
+    reply_markup: {
+      force_reply: true
+    }
+  });
+
+  // Создаем обработчик один раз для этого конкретного ответа
+  bot.use(async (ctx, next) => {
+    // Если это ответ на наше сообщение
+    if (ctx.message && ctx.message.reply_to_message && 
+        ctx.message.reply_to_message.message_id === adminMsg.message_id &&
+        ctx.from.id.toString() === config.adminChatId) {
+
+      const replyText = ctx.message.text;
+
+      try {
+        // Отправляем ответную пятюню пользователю
+        await bot.telegram.sendMessage(userId, 
+          `🖐 Админ дал тебе пять в ответ!\n\n💬 ${replyText}`);
+
+        // Сообщаем админу об успешной отправке
+        await ctx.reply("✅ Твоя пятюня и сообщение отправлены пользователю!");
+
+      } catch (telegramError) {
+        console.error('Error sending high five back to user:', telegramError);
+        await ctx.reply("❌ Не удалось отправить сообщение пользователю.");
+      }
+
+      return; // Не передаем дальше, так как это специальный случай
+    }
+
+    await next(); // Продолжаем обработку для других сообщений
+  });
+
+  await ctx.answerCbQuery("Теперь напиши сообщение для пользователя");
 });
 
 // Команда /confirm_<bookingId> - подтверждение бронирования администратором
