@@ -269,9 +269,9 @@ bot.start(async (ctx) => {
     const sentMessage = await ctx.reply("Привет! Я бот Ритм Капсулы. Пришло время стукнуть в барабаны?", {
       reply_markup: {
         inline_keyboard: [
-          [{ text: "☕️ Записаться на чилле", web_app: { url: `https://drumfitness.ru?chat_id=${ctx.chat.id}` } }],
+          [{ text: "★ Записаться ★", web_app: { url: `https://drumfitness.ru?chat_id=${ctx.chat.id}` } }],
           [{ text: "👋 Дать пять админам", callback_data: "high_five" }],
-          [{ text: "🚨 SOS есть вопросик", url: "https://t.me/rhythmcapsule" }]
+          [{ text: "🚨 SOS! Есть вопросик", url: "https://t.me/rhythmcapsule" }]
         ]
       }
     });
