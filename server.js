@@ -237,6 +237,47 @@ console.log('Created new pending booking', bookingId, 'saved:', saved);
 
 // Обработчики команд бота
 
+// Функция для отправки меню с inline-кнопками
+async function sendInlineMenu(ctx) {
+  try {
+    // Отправляем сообщение с inline-кнопками
+    const sentMessage = await ctx.reply("🥁 Ритм Капсула - твоя территория барабанного релакса!", {
+      reply_markup: {
+        inline_keyboard: [
+          [{ text: "🥁 Записаться на чилле", web_app: { url: `https://drumfitness.ru?chat_id=${ctx.chat.id}` } }],
+          [{ text: "👋 Дать пять админам", callback_data: "high_five" }],
+          [{ text: "🚨 SOS: есть вопросик!", url: "https://t.me/rhythmcapsule" }]
+        ]
+      }
+    });
+
+    // Закрепляем сообщение
+    try {
+      await ctx.pinChatMessage(sentMessage.message_id);
+    } catch (pinError) {
+      console.error('Error pinning message:', pinError);
+      // Продолжаем работу, даже если закрепление не удалось
+    }
+
+    // Отправляем обычную клавиатуру с кнопкой быстрой брони
+    await ctx.reply("Нажми для быстрого доступа к бронированию:", {
+      reply_markup: {
+        keyboard: [
+          [{ text: "⚡ Быстрая бронь" }]
+        ],
+        resize_keyboard: true,
+        persistent: true
+      }
+    });
+
+    return sentMessage;
+  } catch (error) {
+    console.error('Error sending inline menu:', error);
+    ctx.reply('Произошла ошибка. Пожалуйста, попробуйте позже.');
+    return null;
+  }
+}
+
 // Команда /start - сохранение информации о пользователе
 bot.start(async (ctx) => {
   try {
@@ -255,35 +296,42 @@ bot.start(async (ctx) => {
     writeDataFile(USERS_FILE, users);
     console.log(`User registered: ${user.username || user.id}, chat_id: ${ctx.chat.id}`);
 
-    // Формируем URL с правильным синтаксисом
-    const webAppUrl = `https://drumfitness.ru?chat_id=${ctx.chat.id}`;
+    // Отправляем меню с inline-кнопками и клавиатуру
+    await sendInlineMenu(ctx);
 
-    const sentMessage = await ctx.reply("Привет! Я бот бронирования Ритм Капсулы.", {
-      reply_markup: {
-        keyboard: [
-          [{ text: "☕️ Записаться на чилле", web_app: { url: webAppUrl } }],
-          [{ text: "👋 Дать пять админам" }],
-          [{ text: "🚨 SOS: есть вопросик!", web_app: { url: "https://t.me/rhythmcapsule" } }]
-        ],
-        resize_keyboard: true,
-        persistent: true
-      }
-    });
   } catch (error) {
     console.error('Error in start command:', error);
     ctx.reply('Произошла ошибка. Пожалуйста, попробуйте позже.');
   }
 });
 
+// Обработчик кнопки "Быстрая бронь"
+bot.hears("⚡ Быстрая бронь", async (ctx) => {
+  await sendInlineMenu(ctx);
+});
+  
+
+  
+  } catch (error) {
+    console.error('Error in start command:', error);
+    ctx.reply('Произошла ошибка. Пожалуйста, попробуйте позже.');
+  }
+
+  
+});
+
+
+
 
 // Обработчик нажатия на кнопку "Дать пять админам"
-bot.hears("👋 Дать пять админам", async (ctx) => {
+bot.action('high_five', async (ctx) => {
   const userId = ctx.from.id;
   const userName = ctx.from.username 
     ? `@${ctx.from.username}` 
     : `${ctx.from.first_name} ${ctx.from.last_name || ''}`.trim();
 
   // Сообщаем пользователю, что пятюня отправлена
+  await ctx.answerCbQuery("👋 Пятюня отправлена!", {show_alert: true});
   await ctx.reply("👋 Твоя пятюня отправлена админам!");
 
   // Отправляем уведомление администратору
@@ -302,7 +350,7 @@ bot.hears("👋 Дать пять админам", async (ctx) => {
   }
 });
 
-// Обработчик для ответной пятюни от админа - остаётся без изменений
+// Обработчик для ответной пятюни от админа
 bot.action(/high_five_back_(\d+)/, async (ctx) => {
   if (ctx.chat.id.toString() !== config.adminChatId) {
     return ctx.reply('У вас нет прав для выполнения этой команды.');
