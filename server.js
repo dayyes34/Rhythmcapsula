@@ -255,7 +255,7 @@ bot.start(async (ctx) => {
     writeDataFile(USERS_FILE, users);
     console.log(`User registered: ${user.username || user.id}, chat_id: ${ctx.chat.id}`);
 
-    // Отправляем сообщение с inline-кнопками
+    // Отправляем приветствие вместе с inline-кнопками
     const sentMessage = await ctx.reply("Привет! Я бот бронирования Ритм Капсулы. Пришло время стукнуть в барабаны?", {
       reply_markup: {
         inline_keyboard: [
@@ -269,8 +269,8 @@ bot.start(async (ctx) => {
     // Закрепляем сообщение
     await ctx.pinChatMessage(sentMessage.message_id);
 
-    // Устанавливаем клавиатуру без отправки сообщения
-    await ctx.telegram.sendMessage(ctx.chat.id, "\u200B", {
+    // Устанавливаем клавиатуру с минимальным текстом
+    await ctx.telegram.sendMessage(ctx.chat.id, "⚡", {
       reply_markup: {
         keyboard: [
           [{ text: "⚡ Быстрая бронь" }]
