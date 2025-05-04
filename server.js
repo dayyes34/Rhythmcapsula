@@ -271,7 +271,21 @@ bot.start(async (ctx) => {
     console.error('Error in start command:', error);
     ctx.reply('Произошла ошибка. Пожалуйста, попробуйте позже.');
   }
+
+    // Пробуем закрепить отправленное сообщение
+    try {
+      await ctx.pinChatMessage(sentMessage.message_id);
+      console.log(`Pinned message in chat ${ctx.chat.id}`);
+    } catch (error) {
+      console.error('Error pinning message:', error);
+      // Обычно ошибка возникает если у бота нет прав на закрепление сообщений
+      // или если это личный чат, где закрепление не поддерживается
+    }
 });
+
+
+
+
 // Обработчик нажатия на кнопку "Дать пять админам"
 bot.action('high_five', async (ctx) => {
   const userId = ctx.from.id;
