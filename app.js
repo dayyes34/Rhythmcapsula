@@ -208,14 +208,8 @@ function bookSlots() {
   .then(res => res.json())
   .then(res => {
      if(res.status === "OK"){
-         alert("✅ Забронировано успешно! Скоро администрация подтвердит заявку.");
-         // Вместо перезагрузки страницы
-         // location.reload();
-
-         // Закрытие WebApp
-         window.Telegram.WebApp.close();
-     }
-
+         alert("✅ Забронировано успешно! Скоро администратор подтвердит заявку");
+         location.reload();
      } else {
          alert("❌ Ошибка при бронировании! Попробуй повторить запрос");
      }

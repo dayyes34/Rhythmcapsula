@@ -257,7 +257,7 @@ bot.start(async (ctx) => {
 
     await ctx.reply(`Привет, ${user.first_name}! 👋\n\nЯ Бот бронирования Ритм Капсулы.\n\nЧтобы начать, нажмите на кнопку ниже:`, {
       reply_markup: {
-        inline_keyboard: [
+        keyboard: [
           [{ text: '🗓 Открыть календарь бронирования', web_app: { url: 'https://drumfitness.ru' } }]
         ],
         resize_keyboard: true,
