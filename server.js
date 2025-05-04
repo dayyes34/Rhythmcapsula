@@ -259,7 +259,7 @@ bot.start(async (ctx) => {
       reply_markup: {
         inline_keyboard: [
           [{ text: "☕️ Записаться на чилле", web_app: { url: "https://drumfitness.ru" } }],
-          [{ text: "🖐 Дать пять админам", callback_data: "high_five" }],
+          [{ text: "👋 Дать пять админам", callback_data: "high_five" }],
           [{ text: "🚨 SOS: есть вопросик!", url: "https://t.me/rhythmcapsule" }]
         ]
       }
