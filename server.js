@@ -255,8 +255,18 @@ bot.start(async (ctx) => {
     writeDataFile(USERS_FILE, users);
     console.log(`User registered: ${user.username || user.id}, chat_id: ${ctx.chat.id}`);
 
-    // Отправляем приветствие вместе с inline-кнопками
-    const sentMessage = await ctx.reply("Привет! Я бот бронирования Ритм Капсулы. Пришло время стукнуть в барабаны?", {
+    // СНАЧАЛА устанавливаем клавиатуру с минимальным текстом
+    await ctx.telegram.sendMessage(ctx.chat.id, "Приятного пользования", {
+      reply_markup: {
+        keyboard: [
+          [{ text: "⚡ Быстрая бронь" }]
+        ],
+        resize_keyboard: true
+      }
+    });
+
+    // ЗАТЕМ отправляем приветствие вместе с inline-кнопками
+    const sentMessage = await ctx.reply("Привет! Я бот Ритм Капсулы. Пришло время стукнуть в барабаны?", {
       reply_markup: {
         inline_keyboard: [
           [{ text: "☕️ Записаться на чилле", web_app: { url: `https://drumfitness.ru?chat_id=${ctx.chat.id}` } }],
@@ -266,18 +276,8 @@ bot.start(async (ctx) => {
       }
     });
 
-    // Закрепляем сообщение
+    // Закрепляем сообщение с инлайн-кнопками
     await ctx.pinChatMessage(sentMessage.message_id);
-
-    // Устанавливаем клавиатуру с минимальным текстом
-    await ctx.telegram.sendMessage(ctx.chat.id, "⚡", {
-      reply_markup: {
-        keyboard: [
-          [{ text: "⚡ Быстрая бронь" }]
-        ],
-        resize_keyboard: true
-      }
-    });
   } catch (error) {
     console.error(error);
     ctx.reply('Произошла ошибка. Попробуйте позже.');
