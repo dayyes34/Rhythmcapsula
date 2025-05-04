@@ -265,16 +265,7 @@ bot.start(async (ctx) => {
       }
     });
   
-    // Пробуем закрепить отправленное сообщение
-    try {
-      await ctx.pinChatMessage(sentMessage.message_id);
-      console.log(`Pinned message in chat ${ctx.chat.id}`);
-    } catch (error) {
-      console.error('Error pinning message:', error);
-      // Обычно ошибка возникает если у бота нет прав на закрепление сообщений
-      // или если это личный чат, где закрепление не поддерживается
-    }
-  });
+
   
   } catch (error) {
     console.error('Error in start command:', error);
