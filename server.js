@@ -802,4 +802,4 @@ process.once('SIGTERM', () => {
   bot.stop('SIGTERM');
   console.log('Bot stopped due to SIGTERM');
   process.exit(0);
-});
+})
