@@ -309,18 +309,6 @@ bot.start(async (ctx) => {
 bot.hears("⚡ Быстрая бронь", async (ctx) => {
   await sendInlineMenu(ctx);
 });
-  
-
-  
-  } catch (error) {
-    console.error('Error in start command:', error);
-    ctx.reply('Произошла ошибка. Пожалуйста, попробуйте позже.');
-  }
-
-  
-});
-
-
 
 
 // Обработчик нажатия на кнопку "Дать пять админам"
