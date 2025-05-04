@@ -255,46 +255,32 @@ bot.start(async (ctx) => {
     writeDataFile(USERS_FILE, users);
     console.log(`User registered: ${user.username || user.id}, chat_id: ${ctx.chat.id}`);
 
-    const sentMessage = await ctx.reply("Привет! Я бот бронирования Ритм Капсулы.", {
+    const sentMessage =  await ctx.reply("Привет! Я бот бронирования Ритм Капсулы.", {
       reply_markup: {
-        inline_keyboard: [
+        keyboard: [
           [{ text: "🥁 Записаться на чилле", web_app: { url: `https://drumfitness.ru?chat_id=${ctx.chat.id}` } }],
-          [{ text: "👋 Дать пять админам", callback_data: "high_five" }],
-          [{ text: "🚨 SOS: есть вопросик!", url: "https://t.me/rhythmcapsule" }]
-        ]
+          [{ text: "👋 Дать пять админам" }],
+          [{ text: "🚨 SOS: есть вопросик!", web_app: { url: "https://t.me/rhythmcapsule" } }]
+        ],
+        resize_keyboard: true,
+        persistent: true
       }
     });
-  
-
-  
   } catch (error) {
     console.error('Error in start command:', error);
     ctx.reply('Произошла ошибка. Пожалуйста, попробуйте позже.');
   }
-
-    // Пробуем закрепить отправленное сообщение
-    try {
-      await ctx.pinChatMessage(sentMessage.message_id);
-      console.log(`Pinned message in chat ${ctx.chat.id}`);
-    } catch (error) {
-      console.error('Error pinning message:', error);
-      // Обычно ошибка возникает если у бота нет прав на закрепление сообщений
-      // или если это личный чат, где закрепление не поддерживается
-    }
 });
 
 
-
-
 // Обработчик нажатия на кнопку "Дать пять админам"
-bot.action('high_five', async (ctx) => {
+bot.hears("👋 Дать пять админам", async (ctx) => {
   const userId = ctx.from.id;
   const userName = ctx.from.username 
     ? `@${ctx.from.username}` 
     : `${ctx.from.first_name} ${ctx.from.last_name || ''}`.trim();
 
   // Сообщаем пользователю, что пятюня отправлена
-  await ctx.answerCbQuery("👋 Пятюня отправлена!", {show_alert: true});
   await ctx.reply("👋 Твоя пятюня отправлена админам!");
 
   // Отправляем уведомление администратору
@@ -313,7 +299,7 @@ bot.action('high_five', async (ctx) => {
   }
 });
 
-// Обработчик для ответной пятюни от админа
+// Обработчик для ответной пятюни от админа - остаётся без изменений
 bot.action(/high_five_back_(\d+)/, async (ctx) => {
   if (ctx.chat.id.toString() !== config.adminChatId) {
     return ctx.reply('У вас нет прав для выполнения этой команды.');
