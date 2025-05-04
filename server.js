@@ -255,15 +255,27 @@ bot.start(async (ctx) => {
     writeDataFile(USERS_FILE, users);
     console.log(`User registered: ${user.username || user.id}, chat_id: ${ctx.chat.id}`);
 
-    await ctx.reply("Привет! Я бот бронирования Ритм Капсулы.", {
+    const sentMessage = await ctx.reply("Привет! Я бот бронирования Ритм Капсулы.", {
       reply_markup: {
         inline_keyboard: [
-          [{ text: "☕️ Записаться на чилле", web_app: { url: "https://drumfitness.ru" } }],
+          [{ text: "🥁 Записаться на чилле", web_app: { url: `https://drumfitness.ru?chat_id=${ctx.chat.id}` } }],
           [{ text: "👋 Дать пять админам", callback_data: "high_five" }],
           [{ text: "🚨 SOS: есть вопросик!", url: "https://t.me/rhythmcapsule" }]
         ]
       }
     });
+  
+    // Пробуем закрепить отправленное сообщение
+    try {
+      await ctx.pinChatMessage(sentMessage.message_id);
+      console.log(`Pinned message in chat ${ctx.chat.id}`);
+    } catch (error) {
+      console.error('Error pinning message:', error);
+      // Обычно ошибка возникает если у бота нет прав на закрепление сообщений
+      // или если это личный чат, где закрепление не поддерживается
+    }
+  });
+  
   } catch (error) {
     console.error('Error in start command:', error);
     ctx.reply('Произошла ошибка. Пожалуйста, попробуйте позже.');
@@ -277,16 +289,16 @@ bot.action('high_five', async (ctx) => {
     : `${ctx.from.first_name} ${ctx.from.last_name || ''}`.trim();
 
   // Сообщаем пользователю, что пятюня отправлена
-  await ctx.answerCbQuery("✋ Пятюня отправлена!", {show_alert: true});
-  await ctx.reply("🖐 Твоя пятюня отправлена админам!");
+  await ctx.answerCbQuery("👋 Пятюня отправлена!", {show_alert: true});
+  await ctx.reply("👋 Твоя пятюня отправлена админам!");
 
   // Отправляем уведомление администратору
   try {
     await bot.telegram.sendMessage(config.adminChatId, 
-      `🖐 Пользователь ${userName} дал тебе пять!`, {
+      `👋 Пользователь ${userName} дал тебе пять!`, {
       reply_markup: {
         inline_keyboard: [
-          [{ text: "🖐 Дать пять в ответ", callback_data: `high_five_back_${userId}` }]
+          [{ text: "👋 Дать пять в ответ", callback_data: `high_five_back_${userId}` }]
         ]
       }
     });
