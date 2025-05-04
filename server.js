@@ -255,13 +255,11 @@ bot.start(async (ctx) => {
     writeDataFile(USERS_FILE, users);
     console.log(`User registered: ${user.username || user.id}, chat_id: ${ctx.chat.id}`);
 
-    await ctx.reply(`Привет, ${user.first_name}! 👋\n\nЯ Бот бронирования Ритм Капсулы.\n\nЧтобы начать, нажмите на кнопку ниже:`, {
+    await ctx.reply("Привет! Я бот бронирования Ритм Капсулы.", {
       reply_markup: {
-        keyboard: [
-          [{ text: '🗓 Открыть календарь бронирования', web_app: { url: 'https://drumfitness.ru' } }]
-        ],
-        resize_keyboard: true,
-        persistent: true 
+        inline_keyboard: [
+          [{ text: "🥁 Забронировать драм-рум", web_app: { url: "https://drumfitness.ru" } }]
+        ]
       }
     });
   } catch (error) {
