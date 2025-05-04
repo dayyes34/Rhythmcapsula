@@ -255,10 +255,13 @@ bot.start(async (ctx) => {
     writeDataFile(USERS_FILE, users);
     console.log(`User registered: ${user.username || user.id}, chat_id: ${ctx.chat.id}`);
 
-    const sentMessage =  await ctx.reply("Привет! Я бот бронирования Ритм Капсулы.", {
+    // Формируем URL с правильным синтаксисом
+    const webAppUrl = `https://drumfitness.ru?chat_id=${ctx.chat.id}`;
+
+    const sentMessage = await ctx.reply("Привет! Я бот бронирования Ритм Капсулы.", {
       reply_markup: {
         keyboard: [
-          [{ text: "🥁 Записаться на чилле", web_app: { url: `https://drumfitness.ru?chat_id=${ctx.chat.id}` } }],
+          [{ text: "☕️ Записаться на чилле", web_app: { url: webAppUrl } }],
           [{ text: "👋 Дать пять админам" }],
           [{ text: "🚨 SOS: есть вопросик!", web_app: { url: "https://t.me/rhythmcapsule" } }]
         ],
