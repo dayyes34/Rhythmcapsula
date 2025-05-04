@@ -192,7 +192,7 @@ console.log('Created new pending booking', bookingId, 'saved:', saved);
 
 
     // Отправляем уведомление администратору
-    const roomName = room === 'room1' ? 'Капсула 🔵' : 'Капсула 🔴';
+    const roomName = room === 'room1' ? 'Капсула 🔵' : 'Капсула 🔴 ';
     const adminMsg = `🆕 Новое бронирование!\n\n` +
                      `👤 Клиент: ${username}\n` +
                      `📅 Дата: ${date}\n` +
