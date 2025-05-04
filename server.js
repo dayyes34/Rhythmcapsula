@@ -496,10 +496,10 @@ bot.hears(/\/delete_(\d+)/, async (ctx) => {
       return ctx.reply('У вас нет прав для выполнения этой команды.');
     }
 
-    const bookingId = parseInt(ctx.match[1]);
-    if (!bookingId) {
+    if (!ctx.match[1]) {
       return ctx.reply('Пожалуйста, укажите ID бронирования. Пример: /delete_1234567890');
     }
+    const bookingId = ctx.match[1]; // без parseInt - оставляем как строку
 
     // Загружаем данные
     const confirmedBookings = readDataFile(BOOKINGS_FILE);
@@ -512,7 +512,7 @@ bot.hears(/\/delete_(\d+)/, async (ctx) => {
     // Проходимся по всем комнатам и датам
     for (const room in confirmedBookings) {
       for (const date in confirmedBookings[room]) {
-        const bookingIndex = confirmedBookings[room][date].findIndex(booking => booking.id === bookingId);
+        const bookingIndex = confirmedBookings[room][date].findIndex(booking => String(booking.id) === bookingId);
 
         if (bookingIndex !== -1) {
           // Сохраняем информацию для отчета
