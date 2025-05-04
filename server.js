@@ -525,17 +525,17 @@ bot.hears(/\/deleteconfirmed_(\d+)/, async (ctx) => {
           confirmedBookings[room][date].splice(bookingIndex, 1);
           bookingFound = true;
 
-          // Сохраняем изменения
-          writeDataFile(BOOKINGS_FILE, confirmedBookings);
+           // Сохраняем изменения
+           writeDataFile(BOOKINGS_FILE, confirmedBookings);
 
-          return ctx.reply(
-            `✅ Подтвержденное бронирование удалено:\n` +
-            `ID: ${bookingId}\n` +
-            `Комната: ${roomInfo}\n` +
-            `Дата: ${dateInfo}\n` +
-            `Часы: ${hours}\n` +
-            `Клиент: ${booking.customer || 'Неизвестно'}`
-          );
+           return ctx.reply(
+             `✅ Подтвержденное бронирование удалено:
+ ID: ${bookingId}
+ Комната: ${roomInfo}
+ Дата: ${dateInfo}
+ Часы: ${hours}
+ Клиент: ${booking.customer || 'Неизвестно'}`
+           );
         }
       }
     }
