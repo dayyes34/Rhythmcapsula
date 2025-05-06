@@ -266,7 +266,7 @@ bot.start(async (ctx) => {
     });
 
     // ЗАТЕМ отправляем приветствие вместе с inline-кнопками
-    const sentMessage = await ctx.reply("Привет! Я бот Ритм Капсулы. Пришло время стукнуть в барабаны?", {
+    const sentMessage = await ctx.reply("Привет! Это бот бронирования Ритм Капсулы. ⚠️ Внимание! У Вас должен быть указан @username в аккаунте, чтобы мы увидели ваше бронирование и могли с вами связаться. Свяжитесь с нами, если возникли трудности", {
       reply_markup: {
         inline_keyboard: [
           [{ text: "★ Записаться ★", web_app: { url: `https://drumfitness.ru?chat_id=${ctx.chat.id}` } }],
